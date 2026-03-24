@@ -1,0 +1,29 @@
+{
+  "name": "agent-client",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "consume": "tsx src/consumer.ts",
+    "dev": "tsx src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "dependencies": {
+    "@scure/base": "^2.0.0",
+    "@solana/kit": "^5.5.1",
+    "@x402/core": "^2.8.0",
+    "@x402/evm": "^2.8.0",
+    "@x402/fetch": "^2.8.0",
+    "@x402/svm": "^2.8.0",
+    "dotenv": "^17.3.1",
+    "viem": "^2.47.6"
+  },
+  "devDependencies": {
+    "@types/node": "^25.5.0",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
