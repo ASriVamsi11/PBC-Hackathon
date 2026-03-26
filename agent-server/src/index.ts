@@ -10,6 +10,7 @@ import { agentWallet } from "./agent/wallet.js";
 import analyzeRouter from "./routes/analyze.js";
 import generateRouter from "./routes/generate.js";
 import predictRouter from "./routes/predict.js";
+import storageRouter from "./routes/storage.js";
 
 const app = express();
 
@@ -72,6 +73,9 @@ app.use(
 app.use("/api/analyze", analyzeRouter);
 app.use("/api/generate", generateRouter);
 app.use("/api/predict", predictRouter);
+
+// Free storage endpoints (not x402-gated — dashboard calls these)
+app.use("/api/storage", storageRouter);
 
 // Free status endpoint (not x402-gated — dashboard calls this)
 app.get("/api/status", (_req, res) => {
