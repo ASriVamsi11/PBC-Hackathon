@@ -8,6 +8,7 @@ export default function Sidebar() {
 
   const links = [
     { href: "/", label: "Overview", icon: "📊" },
+    { href: "/playground", label: "Playground", icon: "🚀" },
     { href: "/storage", label: "Storage", icon: "💾" },
     { href: "/identity", label: "Identity", icon: "🔐" },
     { href: "/activity", label: "Activity", icon: "⚡" },

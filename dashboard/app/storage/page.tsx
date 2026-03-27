@@ -1,47 +1,60 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { getMemories } from "../../lib/api";
-
-interface MemoryBatch {
-  batchId: number;
-  cid: string;
-  entryCount: number;
-  flushedAt: string;
-}
-
-interface MemoriesResponse {
-  agent: string;
-  indexCID: string;
-  totalBatches: number;
-  batches: MemoryBatch[];
-  currentBufferSize: number;
-}
+import { getMemories, flushMemory } from "../../lib/api";
+import { usePolling } from "../../lib/usePolling";
+import { useToast } from "../components/Toast";
+import { SkeletonCard, SkeletonTableRow } from "../components/Skeleton";
+import { ErrorState } from "../components/ErrorState";
+import type { MemoriesResponse } from "../../lib/types";
 
 export default function StoragePage() {
-  const [data, setData] = useState<MemoriesResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getMemories()
-      .then(setData)
-      .catch((err) => console.error("Failed to fetch memories:", err))
-      .finally(() => setLoading(false));
-  }, []);
+  const { data, loading, error, refetch } = usePolling<MemoriesResponse>(getMemories, 10000);
+  const [flushing, setFlushing] = useState(false);
+  const { toast } = useToast();
 
   const truncateCID = (cid: string) => {
     if (cid.length <= 24) return cid;
     return `${cid.slice(0, 12)}...${cid.slice(-12)}`;
   };
 
+  const handleFlush = async () => {
+    setFlushing(true);
+    try {
+      await flushMemory();
+      toast("Memory flushed successfully!", "success");
+      refetch();
+    } catch {
+      toast("Failed to flush memory", "error");
+    } finally {
+      setFlushing(false);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center h-64">
-        <p className="text-zinc-400 text-lg">Loading storage data...</p>
+      <div className="p-8 space-y-8">
+        <div>
+          <div className="h-8 w-32 bg-zinc-700 rounded animate-pulse mb-2" />
+          <div className="h-4 w-56 bg-zinc-700 rounded animate-pulse" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {[...Array(3)].map((_, i) => <SkeletonCard key={i} />)}
+        </div>
+        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+          <div className="h-6 w-40 bg-zinc-700 rounded animate-pulse mb-6" />
+          <table className="w-full text-sm">
+            <tbody>
+              {[...Array(3)].map((_, i) => <SkeletonTableRow key={i} />)}
+            </tbody>
+          </table>
+        </div>
       </div>
     );
   }
+
+  if (error) return <ErrorState message={error} onRetry={refetch} />;
 
   const batches = data?.batches || [];
 
@@ -56,17 +69,23 @@ export default function StoragePage() {
 
       {/* Storage Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 animate-fade-in-up">
           <p className="text-zinc-400 text-sm font-medium mb-2">Total Batches</p>
           <p className="text-white text-2xl font-bold">{data?.totalBatches || 0}</p>
           <p className="text-zinc-500 text-xs mt-2">flushed to Filecoin</p>
         </div>
-        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 animate-fade-in-up">
           <p className="text-zinc-400 text-sm font-medium mb-2">Buffer Size</p>
           <p className="text-white text-2xl font-bold">{data?.currentBufferSize || 0}</p>
-          <p className="text-zinc-500 text-xs mt-2">entries pending flush</p>
+          <button
+            onClick={handleFlush}
+            disabled={data?.currentBufferSize === 0 || flushing}
+            className="mt-2 px-4 py-1.5 bg-cyan-600 hover:bg-cyan-500 disabled:bg-zinc-600 disabled:cursor-not-allowed text-white text-xs font-medium rounded-lg transition-colors"
+          >
+            {flushing ? "Flushing..." : "Flush Memory"}
+          </button>
         </div>
-        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 animate-fade-in-up">
           <p className="text-zinc-400 text-sm font-medium mb-2">Index CID</p>
           <p className="text-white text-sm font-mono break-all">
             {data?.indexCID ? truncateCID(data.indexCID) : "None yet"}

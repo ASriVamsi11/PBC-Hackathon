@@ -1,15 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { getActivity } from "../../lib/api";
-
-interface ActivityEvent {
-  id: number;
-  type: "earning" | "storage" | "reputation" | "system";
-  title: string;
-  description: string;
-  timestamp: string;
-}
+import { usePolling } from "../../lib/usePolling";
+import { SkeletonCard, SkeletonEventCard } from "../components/Skeleton";
+import { ErrorState } from "../components/ErrorState";
+import type { ActivityEvent } from "../../lib/types";
 
 const EVENT_CONFIG: Record<string, { icon: string; color: string; bgColor: string; borderColor: string }> = {
   earning: { icon: "\ud83d\udcb0", color: "text-green-400", bgColor: "bg-green-500/10", borderColor: "border-green-500/30" },
@@ -19,26 +15,15 @@ const EVENT_CONFIG: Record<string, { icon: string; color: string; bgColor: strin
 };
 
 export default function ActivityPage() {
-  const [events, setEvents] = useState<ActivityEvent[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { data: events, loading, error, refetch } = usePolling<ActivityEvent[]>(getActivity, 5000);
   const [filter, setFilter] = useState("all");
 
-  useEffect(() => {
-    getActivity()
-      .then(setEvents)
-      .catch((err) => console.error("Failed to fetch activity:", err))
-      .finally(() => setLoading(false));
-
-    const interval = setInterval(() => {
-      getActivity().then(setEvents).catch(() => {});
-    }, 5000);
-    return () => clearInterval(interval);
-  }, []);
+  const allEvents = events || [];
 
   const filteredEvents =
     filter === "all"
-      ? events
-      : events.filter((e) => e.type === filter);
+      ? allEvents
+      : allEvents.filter((e) => e.type === filter);
 
   const getTimeAgo = (timestamp: string): string => {
     const now = new Date();
@@ -51,7 +36,7 @@ export default function ActivityPage() {
     return `${Math.floor(diff / 86400)}d ago`;
   };
 
-  const earningEvents = events.filter((e) => e.type === "earning");
+  const earningEvents = allEvents.filter((e) => e.type === "earning");
   const todayEarnings = earningEvents.reduce((sum, e) => {
     const match = e.title.match(/\$([0-9.]+)/);
     return sum + (match ? parseFloat(match[1]) : 0);
@@ -59,11 +44,22 @@ export default function ActivityPage() {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center h-64">
-        <p className="text-zinc-400 text-lg">Loading activity...</p>
+      <div className="p-8 space-y-8">
+        <div>
+          <div className="h-8 w-40 bg-zinc-700 rounded animate-pulse mb-2" />
+          <div className="h-4 w-60 bg-zinc-700 rounded animate-pulse" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
+        </div>
+        <div className="space-y-4">
+          {[...Array(4)].map((_, i) => <SkeletonEventCard key={i} />)}
+        </div>
       </div>
     );
   }
+
+  if (error) return <ErrorState message={error} onRetry={refetch} />;
 
   return (
     <div className="p-8 space-y-8">
@@ -74,24 +70,24 @@ export default function ActivityPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 animate-fade-in-up">
           <p className="text-zinc-400 text-sm font-medium mb-2">Total Earnings</p>
           <p className="text-white text-2xl font-bold">${todayEarnings.toFixed(4)}</p>
           <p className="text-zinc-500 text-xs mt-2">from activity events</p>
         </div>
-        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 animate-fade-in-up">
           <p className="text-zinc-400 text-sm font-medium mb-2">Total Events</p>
-          <p className="text-white text-2xl font-bold">{events.length}</p>
+          <p className="text-white text-2xl font-bold">{allEvents.length}</p>
           <p className="text-zinc-500 text-xs mt-2">since server start</p>
         </div>
-        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 animate-fade-in-up">
           <p className="text-zinc-400 text-sm font-medium mb-2">Earning Events</p>
           <p className="text-white text-2xl font-bold">{earningEvents.length}</p>
           <p className="text-zinc-500 text-xs mt-2">paid requests served</p>
         </div>
-        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 animate-fade-in-up">
           <p className="text-zinc-400 text-sm font-medium mb-2">Storage Events</p>
-          <p className="text-white text-2xl font-bold">{events.filter((e) => e.type === "storage").length}</p>
+          <p className="text-white text-2xl font-bold">{allEvents.filter((e) => e.type === "storage").length}</p>
           <p className="text-zinc-500 text-xs mt-2">Filecoin flushes</p>
         </div>
       </div>
@@ -131,7 +127,7 @@ export default function ActivityPage() {
             return (
               <div
                 key={event.id}
-                className={`border rounded-lg p-6 transition-all hover:border-opacity-100 ${cfg.borderColor} ${cfg.bgColor} border-opacity-50`}
+                className={`border rounded-lg p-6 transition-all hover:border-opacity-100 animate-fade-in-up ${cfg.borderColor} ${cfg.bgColor} border-opacity-50`}
               >
                 <div className="flex gap-4">
                   <div className="flex-shrink-0 text-2xl pt-1">{cfg.icon}</div>

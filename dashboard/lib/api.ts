@@ -23,3 +23,45 @@ export async function getActivity() {
   if (!res.ok) throw new Error(`Activity fetch failed: ${res.status}`);
   return res.json();
 }
+
+export async function callAnalyze(query: string) {
+  const res = await fetch(`${AGENT_URL}/api/playground/analyze`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query }),
+  });
+  if (!res.ok) throw new Error(`Analyze failed: ${res.status}`);
+  return res.json();
+}
+
+export async function callGenerate(prompt: string) {
+  const res = await fetch(`${AGENT_URL}/api/playground/generate`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt }),
+  });
+  if (!res.ok) throw new Error(`Generate failed: ${res.status}`);
+  return res.json();
+}
+
+export async function callPredict(topic: string) {
+  const res = await fetch(`${AGENT_URL}/api/playground/predict`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ topic }),
+  });
+  if (!res.ok) throw new Error(`Predict failed: ${res.status}`);
+  return res.json();
+}
+
+export async function flushMemory() {
+  const res = await fetch(`${AGENT_URL}/api/storage/flush`, { method: "POST" });
+  if (!res.ok) throw new Error(`Flush failed: ${res.status}`);
+  return res.json();
+}
+
+export async function getMemoryByCid(cid: string) {
+  const res = await fetch(`${AGENT_URL}/api/storage/memory/${cid}`);
+  if (!res.ok) throw new Error(`Memory fetch failed: ${res.status}`);
+  return res.json();
+}

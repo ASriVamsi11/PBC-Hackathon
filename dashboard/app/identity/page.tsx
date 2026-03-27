@@ -1,44 +1,43 @@
 "use client";
 
-import { useState, useEffect } from "react";
 import { getIdentity } from "../../lib/api";
-
-interface OnChainAgent {
-  walletAddress: string;
-  name: string;
-  dataCID: string;
-  reputationScore: number;
-  totalEarnings: number;
-  totalRequests: number;
-  registrationTime: number;
-  isActive: boolean;
-}
-
-interface IdentityResponse {
-  agent: string;
-  onChain?: OnChainAgent;
-  status?: string;
-  message?: string;
-}
+import { usePolling } from "../../lib/usePolling";
+import { useToast } from "../components/Toast";
+import { Skeleton } from "../components/Skeleton";
+import { ErrorState } from "../components/ErrorState";
+import type { IdentityResponse } from "../../lib/types";
 
 export default function IdentityPage() {
-  const [data, setData] = useState<IdentityResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    getIdentity()
-      .then(setData)
-      .catch((err) => console.error("Failed to fetch identity:", err))
-      .finally(() => setLoading(false));
-  }, []);
+  const { data, loading, error, refetch } = usePolling<IdentityResponse>(getIdentity, 10000);
+  const { toast } = useToast();
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center h-64">
-        <p className="text-zinc-400 text-lg">Loading identity data...</p>
+      <div className="p-8 space-y-8">
+        <div>
+          <div className="h-8 w-32 bg-zinc-700 rounded animate-pulse mb-2" />
+          <div className="h-4 w-56 bg-zinc-700 rounded animate-pulse" />
+        </div>
+        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-8">
+          <Skeleton className="h-4 w-24 mb-4" />
+          <Skeleton className="h-10 w-64 mb-2" />
+          <Skeleton className="h-4 w-48" />
+        </div>
+        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-8">
+          <Skeleton className="h-6 w-40 mb-8" />
+          <div className="flex items-center justify-between">
+            <div>
+              <Skeleton className="h-12 w-24 mb-2" />
+              <Skeleton className="h-6 w-20" />
+            </div>
+            <Skeleton className="h-32 w-32 rounded-full" />
+          </div>
+        </div>
       </div>
     );
   }
+
+  if (error) return <ErrorState message={error} onRetry={refetch} />;
 
   if (!data?.onChain) {
     return (
@@ -82,7 +81,7 @@ export default function IdentityPage() {
       </div>
 
       {/* Agent Name & Status */}
-      <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-8">
+      <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-8 animate-fade-in-up">
         <div className="flex items-start justify-between mb-6">
           <div>
             <p className="text-zinc-400 text-sm font-medium mb-2">Agent Name</p>
@@ -104,7 +103,7 @@ export default function IdentityPage() {
       </div>
 
       {/* Reputation Gauge */}
-      <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-8">
+      <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-8 animate-fade-in-up">
         <h2 className="text-2xl font-bold text-white mb-8">Reputation Score</h2>
 
         <div className="space-y-6">
@@ -144,6 +143,7 @@ export default function IdentityPage() {
                   strokeWidth="8"
                   strokeDasharray={`${(reputationPercentage / 100) * 339.29} 339.29`}
                   strokeLinecap="round"
+                  style={{ transition: "stroke-dasharray 0.6s ease-out" }}
                 />
                 <defs>
                   <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
@@ -195,7 +195,7 @@ export default function IdentityPage() {
       </div>
 
       {/* Wallet Information */}
-      <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+      <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 animate-fade-in-up">
         <h2 className="text-xl font-bold text-white mb-4">Wallet Information</h2>
         <div className="space-y-4">
           <div>
@@ -206,7 +206,7 @@ export default function IdentityPage() {
               </code>
               <button
                 className="text-zinc-400 hover:text-white text-xs font-medium"
-                onClick={() => navigator.clipboard.writeText(agent.walletAddress)}
+                onClick={() => { navigator.clipboard.writeText(agent.walletAddress); toast("Copied to clipboard!", "success"); }}
               >
                 Copy
               </button>
@@ -237,7 +237,7 @@ export default function IdentityPage() {
       </div>
 
       {/* Registration Info */}
-      <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
+      <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 animate-fade-in-up">
         <h2 className="text-xl font-bold text-white mb-4">Registration Details</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
           <div>
