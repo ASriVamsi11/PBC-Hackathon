@@ -1,6 +1,22 @@
 node_modules/
-.env
 dist/
 .next/
+
+# Environment files (keep .env.example)
+.env
+.env.local
+.env.*.local
+
+# Solana keypairs
+*-keypair.json
+
+# Hardhat / Solidity
 artifacts/
 cache/
+typechain-types/
+
+# OS / IDE
+.DS_Store
+*.swp
+.vscode/
+.idea/
