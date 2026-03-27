@@ -88,7 +88,8 @@ app.post("/api/playground/analyze", async (req, res) => {
     const { analyze } = await import("./services/claude.js");
     const response = await analyze(query);
     agentMemory.addEntry({ type: "analyze", query, response });
-    activityLog.add("earning", "Demo: /api/analyze (free)", `Query: "${query.slice(0, 50)}"`);
+    agentWallet.recordEarning(0.01);
+    activityLog.add("earning", "Earned $0.01 — /api/analyze", `Query: "${query.slice(0, 50)}"`);
     res.json({ result: response, agent: config.AGENT_NAME });
   } catch (err) {
     res.status(500).json({ error: "Analysis failed" });
@@ -105,7 +106,8 @@ app.post("/api/playground/generate", async (req, res) => {
     const { generate } = await import("./services/claude.js");
     const response = await generate(prompt);
     agentMemory.addEntry({ type: "generate", query: prompt, response });
-    activityLog.add("earning", "Demo: /api/generate (free)", `Prompt: "${prompt.slice(0, 50)}"`);
+    agentWallet.recordEarning(0.005);
+    activityLog.add("earning", "Earned $0.005 — /api/generate", `Prompt: "${prompt.slice(0, 50)}"`);
     res.json({ result: response, agent: config.AGENT_NAME });
   } catch (err) {
     res.status(500).json({ error: "Generation failed" });
@@ -122,10 +124,57 @@ app.post("/api/playground/predict", async (req, res) => {
     const { predict } = await import("./services/claude.js");
     const response = await predict(topic);
     agentMemory.addEntry({ type: "predict", query: topic, response });
-    activityLog.add("earning", "Demo: /api/predict (free)", `Topic: "${topic.slice(0, 50)}"`);
+    agentWallet.recordEarning(0.02);
+    activityLog.add("earning", "Earned $0.02 — /api/predict", `Topic: "${topic.slice(0, 50)}"`);
     res.json({ result: response, agent: config.AGENT_NAME });
   } catch (err) {
     res.status(500).json({ error: "Prediction failed" });
+  }
+});
+
+app.post("/api/playground/chat", async (req, res) => {
+  try {
+    const { message, history } = req.body;
+    if (!message || typeof message !== "string") {
+      res.status(400).json({ error: "message is required" });
+      return;
+    }
+
+    res.setHeader("Content-Type", "text/event-stream");
+    res.setHeader("Cache-Control", "no-cache");
+    res.setHeader("Connection", "keep-alive");
+
+    const { chat } = await import("./services/claude.js");
+    const stream = await chat(message, history || []);
+
+    let fullText = "";
+
+    stream.on("text", (text) => {
+      fullText += text;
+      res.write(`data: ${JSON.stringify({ type: "text", text })}\n\n`);
+    });
+
+    stream.on("end", () => {
+      const lower = message.toLowerCase();
+      let type: string = "analyze";
+      if (lower.includes("generate") || lower.includes("write") || lower.includes("create")) type = "generate";
+      if (lower.includes("predict") || lower.includes("forecast") || lower.includes("trend")) type = "predict";
+
+      const priceMap: Record<string, number> = { analyze: 0.01, generate: 0.005, predict: 0.02 };
+      agentMemory.addEntry({ type: type as "analyze" | "generate" | "predict", query: message, response: [{ type: "text", text: fullText }] });
+      agentWallet.recordEarning(priceMap[type]);
+      activityLog.add("earning", `Earned $${priceMap[type]} — /api/chat (${type})`, `"${message.slice(0, 50)}"`);
+
+      res.write(`data: ${JSON.stringify({ type: "done" })}\n\n`);
+      res.end();
+    });
+
+    stream.on("error", () => {
+      res.write(`data: ${JSON.stringify({ type: "error", error: "Stream failed" })}\n\n`);
+      res.end();
+    });
+  } catch (err) {
+    res.status(500).json({ error: "Chat failed" });
   }
 });
 

@@ -52,3 +52,9 @@ export interface PlaygroundResponse {
   result: Array<{ type: string; text?: string }>;
   agent: string;
 }
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
+  timestamp: Date;
+}
