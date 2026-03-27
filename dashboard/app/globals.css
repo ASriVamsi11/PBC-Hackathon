@@ -2,56 +2,85 @@
 
 @theme inline {
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --font-mono: var(--font-dm-mono);
+  --font-serif: var(--font-cormorant);
+
+  --color-bg: #0A0A0A;
+  --color-surface: #111111;
+  --color-surface-2: #1A1A1A;
+  --color-border: #2A2200;
+  --color-gold: #C9A84C;
+  --color-gold-bright: #E8C96A;
+  --color-gold-dim: #7A6230;
+  --color-text: #F0EAD6;
+  --color-text-muted: #8A8070;
+  --color-danger: #C0392B;
+  --color-success: #2E7D52;
 }
 
-/* Scrollbar styling */
+/* Scrollbar */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.1);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.2);
-  border-radius: 4px;
+  background: #2A2200;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.3);
+  background: #7A6230;
 }
 
-/* Animations */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
+/* Animations — restrained, no bounces */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(8px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+.animate-fade-in {
+  animation: fadeIn 200ms ease-out both;
 }
 
-@keyframes highlightPulse {
-  0%, 100% { color: white; }
-  50% { color: rgb(6, 182, 212); }
+/* Section labels */
+.label-section {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--color-gold-dim);
 }
 
-.animate-fade-in-up {
-  animation: fadeInUp 0.3s ease-out both;
+/* Monospace numbers */
+.num {
+  font-family: var(--font-mono);
+  letter-spacing: 0.04em;
+}
+
+/* Table rows alternating */
+.table-row-even { background: #0F0F0F; }
+.table-row-odd { background: #131313; }
+
+/* Gold top accent on hover for cards */
+.card-accent {
+  border-top: 2px solid transparent;
+  transition: border-color 200ms ease-out;
+}
+.card-accent:hover {
+  border-color: var(--color-gold);
+}
+
+/* Linear progress bar */
+@keyframes progressSlide {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+.progress-bar-gold {
+  background: var(--color-gold);
+  animation: progressSlide 1.2s ease-in-out infinite;
 }

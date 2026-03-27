@@ -5,7 +5,7 @@ import { callAnalyze, callGenerate, callPredict, chatStream } from "../../lib/ap
 import { useToast } from "../components/Toast";
 import type { PlaygroundResponse, ChatMessage } from "../../lib/types";
 
-/* ─── Advanced Mode: Original Endpoint Cards ─── */
+/* ─── Advanced Mode: Endpoint Cards ─── */
 
 interface EndpointConfig {
   key: string;
@@ -14,7 +14,6 @@ interface EndpointConfig {
   price: string;
   placeholder: string;
   paramName: string;
-  color: string;
   fetcher: (input: string) => Promise<PlaygroundResponse>;
 }
 
@@ -26,7 +25,6 @@ const ENDPOINTS: EndpointConfig[] = [
     price: "$0.01",
     placeholder: "e.g. Bitcoin price trends 2025",
     paramName: "query",
-    color: "cyan",
     fetcher: callAnalyze,
   },
   {
@@ -36,7 +34,6 @@ const ENDPOINTS: EndpointConfig[] = [
     price: "$0.005",
     placeholder: "e.g. Write a blog intro about DeFi",
     paramName: "prompt",
-    color: "blue",
     fetcher: callGenerate,
   },
   {
@@ -46,35 +43,15 @@ const ENDPOINTS: EndpointConfig[] = [
     price: "$0.02",
     placeholder: "e.g. Solana DeFi ecosystem",
     paramName: "topic",
-    color: "purple",
     fetcher: callPredict,
   },
 ];
-
-const COLOR_MAP: Record<string, { badge: string; border: string; button: string }> = {
-  cyan: {
-    badge: "bg-cyan-500/20 text-cyan-400 border-cyan-500/30",
-    border: "border-cyan-500/30 hover:border-cyan-500/60",
-    button: "bg-cyan-600 hover:bg-cyan-500",
-  },
-  blue: {
-    badge: "bg-blue-500/20 text-blue-400 border-blue-500/30",
-    border: "border-blue-500/30 hover:border-blue-500/60",
-    button: "bg-blue-600 hover:bg-blue-500",
-  },
-  purple: {
-    badge: "bg-purple-500/20 text-purple-400 border-purple-500/30",
-    border: "border-purple-500/30 hover:border-purple-500/60",
-    button: "bg-purple-600 hover:bg-purple-500",
-  },
-};
 
 function EndpointCard({ endpoint }: { endpoint: EndpointConfig }) {
   const [input, setInput] = useState("");
   const [response, setResponse] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-  const colors = COLOR_MAP[endpoint.color];
 
   const handleRun = async () => {
     if (!input.trim()) return;
@@ -95,54 +72,62 @@ function EndpointCard({ endpoint }: { endpoint: EndpointConfig }) {
   };
 
   return (
-    <div className={`bg-zinc-800 border rounded-lg p-6 transition-colors ${colors.border}`}>
+    <div
+      className="card-accent transition-colors duration-150"
+      style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", padding: "24px" }}
+    >
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h3 className="text-white font-bold text-lg">{endpoint.label}</h3>
-          <p className="text-zinc-400 text-xs mt-1">{endpoint.description}</p>
+          <h3 className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>{endpoint.label}</h3>
+          <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>{endpoint.description}</p>
         </div>
-        <span className={`text-xs font-mono px-2 py-1 rounded border ${colors.badge}`}>
+        <span
+          className="num text-xs px-2 py-1"
+          style={{ background: "rgba(201,168,76,0.12)", color: "var(--color-gold)", border: "1px solid rgba(201,168,76,0.2)" }}
+        >
           {endpoint.price}
         </span>
       </div>
 
-      <div className="space-y-4">
+      <div className="space-y-3">
         <div>
-          <label className="text-zinc-400 text-xs font-medium block mb-2">
-            {endpoint.paramName}
-          </label>
+          <label className="label-section block mb-1.5">{endpoint.paramName}</label>
           <input
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === "Enter" && !loading && handleRun()}
             placeholder={endpoint.placeholder}
-            className="w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-3 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-cyan-500 transition-colors"
+            className="w-full px-3 py-2.5 text-sm transition-colors duration-150 focus:outline-none"
+            style={{
+              background: "var(--color-bg)",
+              border: "1px solid var(--color-border)",
+              color: "var(--color-text)",
+            }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = "var(--color-gold)"; }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = "var(--color-border)"; }}
           />
         </div>
 
         <button
           onClick={handleRun}
           disabled={loading || !input.trim()}
-          className={`w-full py-3 rounded-lg text-white text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed ${colors.button}`}
+          className="w-full py-2.5 text-sm font-semibold transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+          style={{
+            background: "var(--color-gold)",
+            color: "var(--color-bg)",
+            borderRadius: "3px",
+          }}
+          onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = "var(--color-gold-bright)"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.background = "var(--color-gold)"; }}
         >
-          {loading ? (
-            <span className="flex items-center justify-center gap-2">
-              <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
-              Processing...
-            </span>
-          ) : (
-            "Run"
-          )}
+          {loading ? "Processing..." : "Run"}
         </button>
 
         {response && (
-          <div className="bg-zinc-900 border border-zinc-700 rounded-lg p-4 max-h-80 overflow-y-auto">
-            <p className="text-zinc-400 text-xs font-medium mb-2">Response</p>
-            <div className="text-zinc-200 text-sm whitespace-pre-wrap leading-relaxed">
+          <div className="max-h-72 overflow-y-auto p-3" style={{ background: "var(--color-bg)", border: "1px solid var(--color-border)" }}>
+            <p className="label-section mb-1.5">Response</p>
+            <div className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: "var(--color-text)" }}>
               {response}
             </div>
           </div>
@@ -181,12 +166,10 @@ function ChatView() {
     setInput("");
     setIsStreaming(true);
 
-    // Reset textarea height
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
 
-    // Send last 10 messages as history (excluding the new user message — it's sent separately)
     const history = [...messages, userMsg].slice(-10).map((m) => ({
       role: m.role,
       content: m.content,
@@ -227,24 +210,35 @@ function ChatView() {
 
   return (
     <div className="flex flex-col h-[calc(100vh-8rem)]">
-      {/* Messages area */}
-      <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4">
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-6 py-6 space-y-4">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full text-center">
-            <div className="w-16 h-16 rounded-full bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center mb-4">
-              <svg className="w-8 h-8 text-cyan-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+            <div
+              className="w-12 h-12 flex items-center justify-center mb-4"
+              style={{ border: "1px solid var(--color-gold)", color: "var(--color-gold)" }}
+            >
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
               </svg>
             </div>
-            <h3 className="text-white font-semibold text-lg mb-2">Chat with PersistAgent</h3>
-            <p className="text-zinc-400 text-sm max-w-md">
-              Ask me to analyze data, generate content, or predict market trends.
-              Each request is processed by one of my AI capabilities.
+            <h3 className="font-serif text-lg font-semibold mb-1" style={{ color: "var(--color-text)" }}>
+              Chat with PersistAgent
+            </h3>
+            <p className="text-xs max-w-sm" style={{ color: "var(--color-text-muted)" }}>
+              Analyze data, generate content, or predict market trends.
+              Each request is processed by one of the agent's AI capabilities.
             </p>
             <div className="flex gap-2 mt-4">
-              <span className="text-xs font-mono px-2 py-1 rounded border bg-cyan-500/20 text-cyan-400 border-cyan-500/30">Analyze $0.01</span>
-              <span className="text-xs font-mono px-2 py-1 rounded border bg-blue-500/20 text-blue-400 border-blue-500/30">Generate $0.005</span>
-              <span className="text-xs font-mono px-2 py-1 rounded border bg-purple-500/20 text-purple-400 border-purple-500/30">Predict $0.02</span>
+              {["Analyze $0.01", "Generate $0.005", "Predict $0.02"].map((label) => (
+                <span
+                  key={label}
+                  className="num text-xs px-2 py-1"
+                  style={{ background: "rgba(201,168,76,0.12)", color: "var(--color-gold)", border: "1px solid rgba(201,168,76,0.2)" }}
+                >
+                  {label}
+                </span>
+              ))}
             </div>
           </div>
         )}
@@ -252,15 +246,19 @@ function ChatView() {
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
             <div
-              className={`max-w-[75%] rounded-2xl px-4 py-3 text-sm leading-relaxed ${
+              className="max-w-[75%] px-4 py-3 text-sm leading-relaxed"
+              style={
                 msg.role === "user"
-                  ? "bg-cyan-600 text-white rounded-br-md"
-                  : "bg-zinc-800 border border-zinc-700 text-zinc-200 rounded-bl-md"
-              }`}
+                  ? { background: "var(--color-gold)", color: "var(--color-bg)", borderRadius: "4px 4px 0 4px" }
+                  : { background: "var(--color-surface)", border: "1px solid var(--color-border)", color: "var(--color-text)", borderRadius: "4px 4px 4px 0" }
+              }
             >
               <div className="whitespace-pre-wrap">{msg.content}</div>
               {msg.role === "assistant" && isStreaming && i === messages.length - 1 && (
-                <span className="inline-block w-2 h-4 bg-cyan-400 animate-pulse ml-0.5 align-text-bottom" />
+                <span
+                  className="inline-block w-1.5 h-4 animate-pulse ml-0.5 align-text-bottom"
+                  style={{ background: "var(--color-gold)" }}
+                />
               )}
             </div>
           </div>
@@ -268,27 +266,40 @@ function ChatView() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Input bar */}
-      <div className="border-t border-zinc-700 px-4 py-4 bg-zinc-900">
+      {/* Input */}
+      <div className="px-6 py-4" style={{ borderTop: "1px solid var(--color-border)", background: "var(--color-surface)" }}>
         <div className="flex items-end gap-3 max-w-4xl mx-auto">
           <textarea
             ref={textareaRef}
             value={input}
             onChange={(e) => {
               setInput(e.target.value);
-              // Auto-resize
               e.target.style.height = "auto";
               e.target.style.height = Math.min(e.target.scrollHeight, 150) + "px";
             }}
             onKeyDown={handleKeyDown}
             placeholder="Message PersistAgent..."
             rows={1}
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-3 text-white text-sm placeholder-zinc-500 focus:outline-none focus:border-cyan-500 transition-colors resize-none"
+            className="flex-1 px-3 py-2.5 text-sm transition-colors duration-150 resize-none focus:outline-none"
+            style={{
+              background: "var(--color-bg)",
+              border: "1px solid var(--color-border)",
+              color: "var(--color-text)",
+            }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = "var(--color-gold)"; }}
+            onBlur={(e) => { e.currentTarget.style.borderColor = "var(--color-border)"; }}
           />
           <button
             onClick={handleSend}
             disabled={isStreaming || !input.trim()}
-            className="bg-cyan-600 hover:bg-cyan-500 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-xl px-4 py-3 transition-colors"
+            className="px-3 py-2.5 transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+            style={{
+              background: "var(--color-gold)",
+              color: "var(--color-bg)",
+              borderRadius: "3px",
+            }}
+            onMouseEnter={(e) => { if (!isStreaming) e.currentTarget.style.background = "var(--color-gold-bright)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "var(--color-gold)"; }}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
@@ -307,29 +318,40 @@ export default function PlaygroundPage() {
   const [chatKey, setChatKey] = useState(0);
 
   return (
-    <div className={advancedMode ? "p-8 space-y-8" : "flex flex-col h-full"}>
+    <div className={advancedMode ? "p-8 space-y-6" : "flex flex-col h-full"}>
       {/* Header */}
       <div className={`flex items-center justify-between ${advancedMode ? "" : "px-8 pt-8 pb-4"}`}>
         <div>
-          <h1 className="text-3xl font-bold text-white mb-1">Playground</h1>
-          <p className="text-zinc-400 text-sm">
-            {advancedMode
-              ? "Test the agent's AI endpoints interactively. These demo calls are free and bypass x402 payment."
-              : "Chat with PersistAgent-Alpha. Demo mode — free, no wallet needed."}
+          <h1 className="font-serif text-2xl font-semibold" style={{ color: "var(--color-text)" }}>
+            Playground
+          </h1>
+          <p className="label-section mt-1">
+            {advancedMode ? "Test endpoints interactively" : "Chat with PersistAgent-Alpha"}
           </p>
         </div>
         <div className="flex items-center gap-3">
           {!advancedMode && (
             <button
               onClick={() => setChatKey((k) => k + 1)}
-              className="text-zinc-400 hover:text-white text-xs transition-colors"
+              className="text-xs transition-colors duration-150"
+              style={{ color: "var(--color-text-muted)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = "var(--color-text)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = "var(--color-text-muted)"; }}
             >
               Clear Chat
             </button>
           )}
           <button
             onClick={() => setAdvancedMode(!advancedMode)}
-            className="flex items-center gap-2 text-xs font-medium px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 transition-colors"
+            className="text-xs font-medium px-3 py-1.5 transition-colors duration-150"
+            style={{
+              color: "var(--color-gold)",
+              border: "1px solid var(--color-gold)",
+              background: "transparent",
+              borderRadius: "3px",
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(201,168,76,0.08)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
           >
             {advancedMode ? "Switch to Chat" : "Advanced Mode"}
           </button>
@@ -339,21 +361,21 @@ export default function PlaygroundPage() {
       {/* Content */}
       {advancedMode ? (
         <>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {ENDPOINTS.map((ep) => (
               <EndpointCard key={ep.key} endpoint={ep} />
             ))}
           </div>
 
-          <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6">
-            <h3 className="text-white font-bold mb-3">How it works</h3>
-            <div className="space-y-2 text-sm text-zinc-400">
+          <div style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", padding: "20px" }}>
+            <p className="label-section mb-2">How it works</p>
+            <div className="space-y-1.5 text-xs" style={{ color: "var(--color-text-muted)" }}>
               <p>
-                In production, these endpoints are gated by <span className="text-cyan-400 font-mono">x402</span> micropayments on Solana.
+                In production, these endpoints are gated by <span className="num" style={{ color: "var(--color-gold)" }}>x402</span> micropayments on Solana.
                 Clients pay per request and the agent earns revenue automatically.
               </p>
               <p>
-                This playground uses free demo routes so you can test the agent without a wallet.
+                This playground uses free demo routes so you can test without a wallet.
                 Each request still generates memory entries and activity logs.
               </p>
             </div>

@@ -7,11 +7,11 @@ import { SkeletonCard, SkeletonEventCard } from "../components/Skeleton";
 import { ErrorState } from "../components/ErrorState";
 import type { ActivityEvent } from "../../lib/types";
 
-const EVENT_CONFIG: Record<string, { icon: string; color: string; bgColor: string; borderColor: string }> = {
-  earning: { icon: "\ud83d\udcb0", color: "text-green-400", bgColor: "bg-green-500/10", borderColor: "border-green-500/30" },
-  storage: { icon: "\ud83d\udcbe", color: "text-blue-400", bgColor: "bg-blue-500/10", borderColor: "border-blue-500/30" },
-  reputation: { icon: "\u2b50", color: "text-yellow-400", bgColor: "bg-yellow-500/10", borderColor: "border-yellow-500/30" },
-  system: { icon: "\u2705", color: "text-white", bgColor: "bg-zinc-700/30", borderColor: "border-zinc-600/30" },
+const EVENT_STYLES: Record<string, { marker: string; color: string }> = {
+  earning: { marker: "#C9A84C", color: "var(--color-gold)" },
+  storage: { marker: "#4A6FA5", color: "#4A6FA5" },
+  reputation: { marker: "#C9A84C", color: "var(--color-gold-dim)" },
+  system: { marker: "#8A8070", color: "var(--color-text-muted)" },
 };
 
 export default function ActivityPage() {
@@ -44,15 +44,15 @@ export default function ActivityPage() {
 
   if (loading) {
     return (
-      <div className="p-8 space-y-8">
+      <div className="p-8 space-y-6">
         <div>
-          <div className="h-8 w-40 bg-zinc-700 rounded animate-pulse mb-2" />
-          <div className="h-4 w-60 bg-zinc-700 rounded animate-pulse" />
+          <div className="h-8 w-40 rounded animate-pulse" style={{ background: "var(--color-surface-2)" }} />
+          <div className="h-4 w-60 rounded animate-pulse mt-2" style={{ background: "var(--color-surface-2)" }} />
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
         </div>
-        <div className="space-y-4">
+        <div className="space-y-3">
           {[...Array(4)].map((_, i) => <SkeletonEventCard key={i} />)}
         </div>
       </div>
@@ -61,54 +61,46 @@ export default function ActivityPage() {
 
   if (error) return <ErrorState message={error} onRetry={refetch} />;
 
+  const FILTERS = [
+    { value: "all", label: "All" },
+    { value: "earning", label: "Earnings" },
+    { value: "storage", label: "Storage" },
+    { value: "reputation", label: "Reputation" },
+    { value: "system", label: "System" },
+  ];
+
   return (
-    <div className="p-8 space-y-8">
+    <div className="p-8 space-y-6">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold text-white mb-2">Activity Feed</h1>
-        <p className="text-zinc-400 text-sm">Real-time agent actions and events (auto-refreshes every 5s)</p>
+        <h1 className="font-serif text-2xl font-semibold" style={{ color: "var(--color-text)" }}>
+          Activity Feed
+        </h1>
+        <p className="label-section mt-1">Auto-refreshes every 5s</p>
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 animate-fade-in-up">
-          <p className="text-zinc-400 text-sm font-medium mb-2">Total Earnings</p>
-          <p className="text-white text-2xl font-bold">${todayEarnings.toFixed(4)}</p>
-          <p className="text-zinc-500 text-xs mt-2">from activity events</p>
-        </div>
-        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 animate-fade-in-up">
-          <p className="text-zinc-400 text-sm font-medium mb-2">Total Events</p>
-          <p className="text-white text-2xl font-bold">{allEvents.length}</p>
-          <p className="text-zinc-500 text-xs mt-2">since server start</p>
-        </div>
-        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 animate-fade-in-up">
-          <p className="text-zinc-400 text-sm font-medium mb-2">Earning Events</p>
-          <p className="text-white text-2xl font-bold">{earningEvents.length}</p>
-          <p className="text-zinc-500 text-xs mt-2">paid requests served</p>
-        </div>
-        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 animate-fade-in-up">
-          <p className="text-zinc-400 text-sm font-medium mb-2">Storage Events</p>
-          <p className="text-white text-2xl font-bold">{allEvents.filter((e) => e.type === "storage").length}</p>
-          <p className="text-zinc-500 text-xs mt-2">Filecoin flushes</p>
-        </div>
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <StatCard label="Total Earnings" value={`$${todayEarnings.toFixed(4)}`} sub="from activity events" />
+        <StatCard label="Total Events" value={String(allEvents.length)} sub="since server start" />
+        <StatCard label="Earning Events" value={String(earningEvents.length)} sub="paid requests served" />
+        <StatCard label="Storage Events" value={String(allEvents.filter((e) => e.type === "storage").length)} sub="Filecoin flushes" />
       </div>
 
       {/* Filter */}
-      <div className="flex gap-3 flex-wrap">
-        {[
-          { value: "all", label: "All Events" },
-          { value: "earning", label: "Earnings" },
-          { value: "storage", label: "Storage" },
-          { value: "reputation", label: "Reputation" },
-          { value: "system", label: "System" },
-        ].map((opt) => (
+      <div className="flex gap-2 flex-wrap">
+        {FILTERS.map((opt) => (
           <button
             key={opt.value}
             onClick={() => setFilter(opt.value)}
-            className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-              filter === opt.value
-                ? "bg-cyan-600 text-white"
-                : "bg-zinc-800 text-zinc-400 hover:text-white hover:bg-zinc-700 border border-zinc-700"
-            }`}
+            className="px-3 py-1.5 text-xs font-medium transition-colors duration-150"
+            style={{
+              background: filter === opt.value ? "var(--color-gold)" : "transparent",
+              color: filter === opt.value ? "var(--color-bg)" : "var(--color-text-muted)",
+              border: filter === opt.value ? "1px solid var(--color-gold)" : "1px solid var(--color-border)",
+              borderRadius: "3px",
+              fontWeight: filter === opt.value ? 600 : 400,
+            }}
           >
             {opt.label}
           </button>
@@ -116,41 +108,45 @@ export default function ActivityPage() {
       </div>
 
       {/* Event Timeline */}
-      <div className="space-y-4">
+      <div className="space-y-0" style={{ border: "1px solid var(--color-border)" }}>
         {filteredEvents.length === 0 ? (
-          <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-8 text-center">
-            <p className="text-zinc-400">No events yet. Make requests to the agent to generate activity.</p>
+          <div className="p-8 text-center" style={{ background: "var(--color-surface)" }}>
+            <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
+              No events yet. Make requests to the agent to generate activity.
+            </p>
           </div>
         ) : (
-          filteredEvents.map((event) => {
-            const cfg = EVENT_CONFIG[event.type] || EVENT_CONFIG.system;
+          filteredEvents.map((event, idx) => {
+            const style = EVENT_STYLES[event.type] || EVENT_STYLES.system;
             return (
               <div
                 key={event.id}
-                className={`border rounded-lg p-6 transition-all hover:border-opacity-100 animate-fade-in-up ${cfg.borderColor} ${cfg.bgColor} border-opacity-50`}
+                className={`flex gap-4 px-5 py-4 animate-fade-in ${idx % 2 === 0 ? "table-row-even" : "table-row-odd"}`}
+                style={{ borderBottom: idx < filteredEvents.length - 1 ? "1px solid var(--color-border)" : "none" }}
               >
-                <div className="flex gap-4">
-                  <div className="flex-shrink-0 text-2xl pt-1">{cfg.icon}</div>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <h3 className="text-white font-semibold text-sm md:text-base">
-                          {event.title}
-                        </h3>
-                        <p className="text-zinc-400 text-xs md:text-sm mt-1">
-                          {event.description}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex-shrink-0 text-right">
-                    <p className="text-zinc-500 text-xs font-mono">
-                      {getTimeAgo(event.timestamp)}
-                    </p>
-                    <p className="text-zinc-600 text-xs mt-1 whitespace-nowrap">
-                      {new Date(event.timestamp).toLocaleTimeString()}
-                    </p>
-                  </div>
+                {/* Marker */}
+                <div className="flex-shrink-0 pt-1.5">
+                  <div className="w-2 h-2 rounded-full" style={{ background: style.marker }} />
+                </div>
+
+                {/* Content */}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>
+                    {event.title}
+                  </p>
+                  <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>
+                    {event.description}
+                  </p>
+                </div>
+
+                {/* Time */}
+                <div className="flex-shrink-0 text-right">
+                  <p className="num text-xs" style={{ color: "var(--color-text-muted)" }}>
+                    {getTimeAgo(event.timestamp)}
+                  </p>
+                  <p className="num text-xs mt-0.5" style={{ color: "var(--color-gold-dim)" }}>
+                    {new Date(event.timestamp).toLocaleTimeString()}
+                  </p>
                 </div>
               </div>
             );
@@ -159,27 +155,30 @@ export default function ActivityPage() {
       </div>
 
       {/* Legend */}
-      <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-6 mt-8">
-        <h3 className="text-white font-bold mb-4">Event Types</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">{"\ud83d\udcb0"}</span>
-            <span className="text-zinc-400">Earnings</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">{"\ud83d\udcbe"}</span>
-            <span className="text-zinc-400">Storage</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">{"\u2b50"}</span>
-            <span className="text-zinc-400">Reputation</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-2xl">{"\u2705"}</span>
-            <span className="text-zinc-400">System</span>
-          </div>
+      <div className="animate-fade-in" style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", padding: "20px" }}>
+        <p className="label-section mb-3">Event Types</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
+          {Object.entries(EVENT_STYLES).map(([type, style]) => (
+            <div key={type} className="flex items-center gap-2">
+              <div className="w-2 h-2 rounded-full" style={{ background: style.marker }} />
+              <span style={{ color: "var(--color-text-muted)" }} className="capitalize">{type}</span>
+            </div>
+          ))}
         </div>
       </div>
+    </div>
+  );
+}
+
+function StatCard({ label, value, sub }: { label: string; value: string; sub: string }) {
+  return (
+    <div
+      className="card-accent animate-fade-in"
+      style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", padding: "20px" }}
+    >
+      <p className="label-section mb-2">{label}</p>
+      <p className="num text-xl font-semibold" style={{ color: "var(--color-text)" }}>{value}</p>
+      <p className="text-xs mt-1.5" style={{ color: "var(--color-text-muted)" }}>{sub}</p>
     </div>
   );
 }

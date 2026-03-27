@@ -24,10 +24,10 @@ export function useToast(): ToastContextValue {
   return ctx;
 }
 
-const TYPE_STYLES: Record<ToastType, string> = {
-  success: "bg-green-600 border-green-500",
-  error: "bg-red-600 border-red-500",
-  info: "bg-cyan-600 border-cyan-500",
+const TYPE_COLORS: Record<ToastType, { bg: string; border: string; text: string }> = {
+  success: { bg: "var(--color-surface)", border: "var(--color-success)", text: "var(--color-success)" },
+  error: { bg: "var(--color-surface)", border: "var(--color-danger)", text: "var(--color-danger)" },
+  info: { bg: "var(--color-surface)", border: "var(--color-gold)", text: "var(--color-gold)" },
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {
@@ -45,14 +45,23 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     <ToastContext value={{ toast }}>
       {children}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col gap-3 pointer-events-none">
-        {toasts.map((t) => (
-          <div
-            key={t.id}
-            className={`pointer-events-auto px-4 py-3 rounded-lg border text-white text-sm font-medium shadow-lg animate-[slideIn_0.3s_ease-out] ${TYPE_STYLES[t.type]}`}
-          >
-            {t.message}
-          </div>
-        ))}
+        {toasts.map((t) => {
+          const colors = TYPE_COLORS[t.type];
+          return (
+            <div
+              key={t.id}
+              className="pointer-events-auto px-4 py-3 text-sm font-medium animate-fade-in"
+              style={{
+                background: colors.bg,
+                borderLeft: `2px solid ${colors.border}`,
+                color: colors.text,
+                boxShadow: "0 2px 8px rgba(0,0,0,0.4)",
+              }}
+            >
+              {t.message}
+            </div>
+          );
+        })}
       </div>
     </ToastContext>
   );
