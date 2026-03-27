@@ -1,23 +1,69 @@
 "use client";
 
+import { useState, useEffect } from "react";
+import { getIdentity } from "../../lib/api";
+
+interface OnChainAgent {
+  walletAddress: string;
+  name: string;
+  dataCID: string;
+  reputationScore: number;
+  totalEarnings: number;
+  totalRequests: number;
+  registrationTime: number;
+  isActive: boolean;
+}
+
+interface IdentityResponse {
+  agent: string;
+  onChain?: OnChainAgent;
+  status?: string;
+  message?: string;
+}
+
 export default function IdentityPage() {
-  const mockIdentity = {
-    agentName: "PersistAgent-Alpha",
-    walletAddress: "0x742d35Cc6634C0532925a3b844Bc9e7595f42e3b",
-    reputationScore: 502,
-    maxReputation: 1000,
-    registrationTime: "2025-01-15 08:32:00",
-    status: "Active",
-    deploymentChain: "Filecoin Calibration testnet",
-    creationBlock: 19347821,
-    verifiedRequests: 15847,
-    failureRate: 0.12,
-  };
+  const [data, setData] = useState<IdentityResponse | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const reputationPercentage =
-    (mockIdentity.reputationScore / mockIdentity.maxReputation) * 100;
+  useEffect(() => {
+    getIdentity()
+      .then(setData)
+      .catch((err) => console.error("Failed to fetch identity:", err))
+      .finally(() => setLoading(false));
+  }, []);
 
-  // Determine reputation tier
+  if (loading) {
+    return (
+      <div className="p-8 flex items-center justify-center h-64">
+        <p className="text-zinc-400 text-lg">Loading identity data...</p>
+      </div>
+    );
+  }
+
+  if (!data?.onChain) {
+    return (
+      <div className="p-8 space-y-8">
+        <div>
+          <h1 className="text-3xl font-bold text-white mb-2">Identity</h1>
+          <p className="text-zinc-400 text-sm">On-chain agent identity & reputation</p>
+        </div>
+        <div className="bg-zinc-800 border border-zinc-700 rounded-lg p-8 text-center">
+          <p className="text-zinc-400 text-lg mb-2">Agent not registered on-chain</p>
+          <p className="text-zinc-500 text-sm">
+            {data?.message || "Start the agent server to trigger on-chain registration during boot."}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const agent = data.onChain;
+  const maxReputation = 1000;
+  const reputationPercentage = (agent.reputationScore / maxReputation) * 100;
+  const registrationDate = agent.registrationTime > 0
+    ? new Date(agent.registrationTime * 1000).toLocaleString()
+    : "Unknown";
+
   const getReputationTier = (score: number) => {
     if (score >= 900) return { name: "Diamond", color: "from-cyan-500 to-blue-500" };
     if (score >= 700) return { name: "Platinum", color: "from-blue-500 to-purple-500" };
@@ -26,7 +72,7 @@ export default function IdentityPage() {
     return { name: "Bronze", color: "from-amber-700 to-amber-800" };
   };
 
-  const tier = getReputationTier(mockIdentity.reputationScore);
+  const tier = getReputationTier(agent.reputationScore);
 
   return (
     <div className="p-8 space-y-8">
@@ -41,20 +87,19 @@ export default function IdentityPage() {
           <div>
             <p className="text-zinc-400 text-sm font-medium mb-2">Agent Name</p>
             <h2 className="text-4xl font-bold text-white">
-              {mockIdentity.agentName}
+              {agent.name}
             </h2>
           </div>
           <div className="text-right">
-            <div className="inline-block bg-green-500/20 border border-green-500/50 rounded-full px-4 py-2">
-              <p className="text-green-400 font-medium text-sm">
-                {mockIdentity.status}
+            <div className={`inline-block ${agent.isActive ? "bg-green-500/20 border-green-500/50" : "bg-red-500/20 border-red-500/50"} border rounded-full px-4 py-2`}>
+              <p className={`${agent.isActive ? "text-green-400" : "text-red-400"} font-medium text-sm`}>
+                {agent.isActive ? "Active" : "Inactive"}
               </p>
             </div>
           </div>
         </div>
         <p className="text-zinc-400 text-sm">
-          Deployed on {mockIdentity.deploymentChain} • Block{" "}
-          {mockIdentity.creationBlock.toLocaleString()}
+          Deployed on Filecoin Calibration testnet
         </p>
       </div>
 
@@ -68,10 +113,10 @@ export default function IdentityPage() {
             <div>
               <div className="flex items-baseline gap-2 mb-2">
                 <span className="text-5xl font-bold text-white">
-                  {mockIdentity.reputationScore}
+                  {agent.reputationScore}
                 </span>
                 <span className="text-zinc-400 text-lg">
-                  / {mockIdentity.maxReputation}
+                  / {maxReputation}
                 </span>
               </div>
               <div className={`inline-block px-3 py-1 rounded-full text-sm font-bold bg-gradient-to-r ${tier.color} text-white`}>
@@ -82,7 +127,6 @@ export default function IdentityPage() {
             {/* Circular Progress */}
             <div className="relative w-32 h-32">
               <svg className="w-full h-full transform -rotate-90" viewBox="0 0 120 120">
-                {/* Background circle */}
                 <circle
                   cx="60"
                   cy="60"
@@ -91,7 +135,6 @@ export default function IdentityPage() {
                   stroke="#27272a"
                   strokeWidth="8"
                 />
-                {/* Progress circle */}
                 <circle
                   cx="60"
                   cy="60"
@@ -136,15 +179,15 @@ export default function IdentityPage() {
           {/* Stats */}
           <div className="grid grid-cols-2 gap-4 pt-4">
             <div className="bg-zinc-900 rounded-lg p-4">
-              <p className="text-zinc-400 text-xs mb-1">Verified Requests</p>
+              <p className="text-zinc-400 text-xs mb-1">Total Requests (on-chain)</p>
               <p className="text-white text-lg font-bold">
-                {mockIdentity.verifiedRequests.toLocaleString()}
+                {agent.totalRequests.toLocaleString()}
               </p>
             </div>
             <div className="bg-zinc-900 rounded-lg p-4">
-              <p className="text-zinc-400 text-xs mb-1">Failure Rate</p>
+              <p className="text-zinc-400 text-xs mb-1">Total Earnings (on-chain)</p>
               <p className="text-white text-lg font-bold">
-                {(mockIdentity.failureRate * 100).toFixed(2)}%
+                {agent.totalEarnings.toLocaleString()}
               </p>
             </div>
           </div>
@@ -156,20 +199,31 @@ export default function IdentityPage() {
         <h2 className="text-xl font-bold text-white mb-4">Wallet Information</h2>
         <div className="space-y-4">
           <div>
-            <p className="text-zinc-400 text-sm mb-2">Wallet Address</p>
+            <p className="text-zinc-400 text-sm mb-2">FEVM Wallet Address</p>
             <div className="flex items-center gap-2 bg-zinc-900 rounded px-4 py-3">
               <code className="text-cyan-400 text-sm font-mono flex-1">
-                {mockIdentity.walletAddress}
+                {agent.walletAddress}
               </code>
-              <button className="text-zinc-400 hover:text-white text-xs font-medium">
+              <button
+                className="text-zinc-400 hover:text-white text-xs font-medium"
+                onClick={() => navigator.clipboard.writeText(agent.walletAddress)}
+              >
                 Copy
               </button>
+            </div>
+          </div>
+          <div>
+            <p className="text-zinc-400 text-sm mb-2">Data CID</p>
+            <div className="flex items-center gap-2 bg-zinc-900 rounded px-4 py-3">
+              <code className="text-cyan-400 text-sm font-mono flex-1 break-all">
+                {agent.dataCID || "None"}
+              </code>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-zinc-400 text-sm mb-2">Chain</p>
-              <p className="text-white font-medium">{mockIdentity.deploymentChain}</p>
+              <p className="text-white font-medium">Filecoin Calibration testnet</p>
             </div>
             <div>
               <p className="text-zinc-400 text-sm mb-2">Network Status</p>
@@ -188,21 +242,11 @@ export default function IdentityPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm">
           <div>
             <p className="text-zinc-400 mb-1">Registration Time</p>
-            <p className="text-white font-medium">{mockIdentity.registrationTime}</p>
-          </div>
-          <div>
-            <p className="text-zinc-400 mb-1">Creation Block</p>
-            <p className="text-white font-mono font-medium">
-              {mockIdentity.creationBlock.toLocaleString()}
-            </p>
+            <p className="text-white font-medium">{registrationDate}</p>
           </div>
           <div>
             <p className="text-zinc-400 mb-1">Current Status</p>
-            <p className="text-gray-900 dark:text-white font-medium">{mockIdentity.status}</p>
-          </div>
-          <div>
-            <p className="text-gray-600 dark:text-zinc-400 mb-1">Uptime</p>
-            <p className="text-gray-900 dark:text-white font-medium">99.97%</p>
+            <p className="text-white font-medium">{agent.isActive ? "Active" : "Inactive"}</p>
           </div>
         </div>
       </div>
