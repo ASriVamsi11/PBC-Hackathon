@@ -1,6 +1,7 @@
 import { storeOnFilecoin } from "../services/storage.js";
 import { updateDataCID } from "../services/identity.js";
 import { activityLog } from "./activity.js";
+import { config } from "../config.js";
 
 export interface MemoryEntry {
   type: "analyze" | "generate" | "predict";
@@ -56,7 +57,7 @@ class AgentMemory {
       });
 
       const indexCID = await storeOnFilecoin(
-        { agent: "PersistAgent-Alpha", batches: this.memoryIndex },
+        { agent: config.AGENT_NAME, batches: this.memoryIndex },
         `memory-index-${Date.now()}`,
       );
       this.indexCID = indexCID;

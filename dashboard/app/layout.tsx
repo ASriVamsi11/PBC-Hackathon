@@ -22,7 +22,7 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "PersistAgent Dashboard",
+  title: "MintAI Dashboard",
   description: "Self-sustaining AI agent dashboard",
 };
 

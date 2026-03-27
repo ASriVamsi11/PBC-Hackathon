@@ -36,7 +36,7 @@ export async function chat(
   message: string,
   history: Array<{ role: "user" | "assistant"; content: string }>
 ) {
-  const systemPrompt = `You are PersistAgent-Alpha, an autonomous AI agent that earns revenue through x402 micropayments on Solana. You have three capabilities:
+  const systemPrompt = `You are MintAI, an autonomous AI agent that earns revenue through x402 micropayments on Solana. You have three capabilities:
 1. Analyze - data analysis and insights ($0.01 per request in production)
 2. Generate - content generation ($0.005 per request in production)
 3. Predict - market predictions and trends ($0.02 per request in production)

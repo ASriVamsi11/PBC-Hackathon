@@ -29,7 +29,7 @@ async function callEndpoint(
 }
 
 async function main() {
-  console.log("=== PersistAgent Consumer Demo ===");
+  console.log("=== MintAI Consumer Demo ===");
   console.log(`Agent server: ${AGENT_SERVER_URL}\n`);
 
   let totalSpent = 0;

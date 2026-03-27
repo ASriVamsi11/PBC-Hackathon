@@ -121,7 +121,7 @@ export default function Overview() {
 
   if (error) return <ErrorState message={error} onRetry={refetch} />;
 
-  const agentName = status?.agent || "PersistAgent-Alpha";
+  const agentName = status?.agent || "MintAI";
   const totalEarnings = status?.totalEarningsUsd || 0;
   const totalRequests = status?.totalRequests || 0;
   const walletAddress = status?.wallet || "N/A";

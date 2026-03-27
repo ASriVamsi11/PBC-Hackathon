@@ -15,6 +15,6 @@ export const config = {
   FEVM_RPC_URL: process.env.FEVM_RPC_URL || "https://api.calibration.node.glif.io/rpc/v1",
   FEVM_PRIVATE_KEY: process.env.FEVM_PRIVATE_KEY || "",
   REGISTRY_CONTRACT_ADDRESS: process.env.REGISTRY_CONTRACT_ADDRESS || "",
-  AGENT_NAME: process.env.AGENT_NAME || "PersistAgent-Alpha",
+  AGENT_NAME: process.env.AGENT_NAME || "MintAI",
   PORT: parseInt(process.env.PORT || "4021", 10),
 };

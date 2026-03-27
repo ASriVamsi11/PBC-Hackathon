@@ -1,5 +1,5 @@
 {
-  "name": "persistagent-contracts",
+  "name": "mintai-contracts",
   "version": "1.0.0",
   "scripts": {
     "compile": "npx hardhat compile",

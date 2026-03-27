@@ -79,7 +79,7 @@ export default function IdentityPage() {
           <div>
             <p className="label-section mb-2">Agent Name</p>
             <h2 className="font-serif text-3xl font-semibold" style={{ color: "var(--color-text)" }}>
-              {agent.name}
+              MintAI
             </h2>
           </div>
           <div

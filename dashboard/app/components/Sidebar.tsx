@@ -66,11 +66,11 @@ export default function Sidebar() {
             className="w-8 h-8 flex items-center justify-center"
             style={{ border: "1px solid var(--color-gold)", color: "var(--color-gold)" }}
           >
-            <span className="font-serif font-bold text-sm">PA</span>
+            <span className="font-serif font-bold text-sm">MA</span>
           </div>
           <div>
             <h1 className="font-serif font-semibold text-sm" style={{ color: "var(--color-text)" }}>
-              PersistAgent
+              MintAI
             </h1>
             <p className="label-section" style={{ fontSize: "9px" }}>Dashboard</p>
           </div>

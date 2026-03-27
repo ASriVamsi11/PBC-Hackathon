@@ -223,7 +223,7 @@ function ChatView() {
               </svg>
             </div>
             <h3 className="font-serif text-lg font-semibold mb-1" style={{ color: "var(--color-text)" }}>
-              Chat with PersistAgent
+              Chat with MintAI
             </h3>
             <p className="text-xs max-w-sm" style={{ color: "var(--color-text-muted)" }}>
               Analyze data, generate content, or predict market trends.
@@ -278,7 +278,7 @@ function ChatView() {
               e.target.style.height = Math.min(e.target.scrollHeight, 150) + "px";
             }}
             onKeyDown={handleKeyDown}
-            placeholder="Message PersistAgent..."
+            placeholder="Message MintAI..."
             rows={1}
             className="flex-1 px-3 py-2.5 text-sm transition-colors duration-150 resize-none focus:outline-none"
             style={{
@@ -326,7 +326,7 @@ export default function PlaygroundPage() {
             Playground
           </h1>
           <p className="label-section mt-1">
-            {advancedMode ? "Test endpoints interactively" : "Chat with PersistAgent-Alpha"}
+            {advancedMode ? "Test endpoints interactively" : "Chat with MintAI"}
           </p>
         </div>
         <div className="flex items-center gap-3">
