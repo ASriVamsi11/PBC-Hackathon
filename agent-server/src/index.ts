@@ -11,6 +11,8 @@ import analyzeRouter from "./routes/analyze.js";
 import generateRouter from "./routes/generate.js";
 import predictRouter from "./routes/predict.js";
 import storageRouter from "./routes/storage.js";
+import activityRouter from "./routes/activity.js";
+import { boot } from "./agent/boot.js";
 
 const app = express();
 
@@ -77,6 +79,9 @@ app.use("/api/predict", predictRouter);
 // Free storage endpoints (not x402-gated — dashboard calls these)
 app.use("/api/storage", storageRouter);
 
+// Free activity endpoint
+app.use("/api/activity", activityRouter);
+
 // Free status endpoint (not x402-gated — dashboard calls this)
 app.get("/api/status", (_req, res) => {
   const wallet = agentWallet.getStats();
@@ -90,9 +95,11 @@ app.get("/api/status", (_req, res) => {
   });
 });
 
-app.listen(config.PORT, () => {
-  console.log(`${config.AGENT_NAME} running on http://localhost:${config.PORT}`);
-  console.log(`  Wallet: ${config.SVM_ADDRESS}`);
-  console.log(`  Paid endpoints: /api/analyze ($0.01), /api/generate ($0.005), /api/predict ($0.02)`);
-  console.log(`  Free endpoint:  /api/status`);
+boot().then(() => {
+  app.listen(config.PORT, () => {
+    console.log(`${config.AGENT_NAME} running on http://localhost:${config.PORT}`);
+    console.log(`  Wallet: ${config.SVM_ADDRESS}`);
+    console.log(`  Paid endpoints: /api/analyze ($0.01), /api/generate ($0.005), /api/predict ($0.02)`);
+    console.log(`  Free endpoints: /api/status, /api/activity`);
+  });
 });

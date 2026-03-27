@@ -1,5 +1,6 @@
 import { storeOnFilecoin } from "../services/storage.js";
 import { updateDataCID } from "../services/identity.js";
+import { activityLog } from "./activity.js";
 
 export interface MemoryEntry {
   type: "analyze" | "generate" | "predict";
@@ -69,6 +70,7 @@ class AgentMemory {
       console.log(
         `[Memory] Flushed ${batch.length} entries → batch CID: ${batchCID}, index CID: ${indexCID}`,
       );
+      activityLog.add("storage", "Memory flushed to Filecoin", `Batch ${this.batchCounter}: ${batch.length} entries, CID: ${batchCID}`);
       return batchCID;
     } finally {
       this.flushing = false;
