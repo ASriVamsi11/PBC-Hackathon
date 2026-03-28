@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useWallet } from "@solana/wallet-adapter-react";
+import { useWalletModal } from "@solana/wallet-adapter-react-ui";
 
 const NAV_LINKS = [
   {
@@ -51,8 +53,14 @@ const NAV_LINKS = [
   },
 ];
 
+function truncateAddress(addr: string) {
+  return `${addr.slice(0, 4)}...${addr.slice(-4)}`;
+}
+
 export default function Sidebar() {
   const pathname = usePathname();
+  const { connected, publicKey, disconnect } = useWallet();
+  const { setVisible } = useWalletModal();
 
   return (
     <div
@@ -117,11 +125,50 @@ export default function Sidebar() {
       </nav>
 
       {/* Footer */}
-      <div className="px-5 py-4" style={{ borderTop: "1px solid var(--color-border)" }}>
-        <p className="label-section mb-2">Status</p>
-        <div className="flex items-center gap-2">
-          <div className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-success)" }} />
-          <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>Active</span>
+      <div className="px-5 py-4 space-y-3" style={{ borderTop: "1px solid var(--color-border)" }}>
+        <div>
+          <p className="label-section mb-2">Status</p>
+          <div className="flex items-center gap-2">
+            <div className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-success)" }} />
+            <span className="text-xs" style={{ color: "var(--color-text-muted)" }}>Active</span>
+          </div>
+        </div>
+
+        <div>
+          <p className="label-section mb-2">Wallet</p>
+          {connected && publicKey ? (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--color-success)" }} />
+                <span className="num text-xs" style={{ color: "var(--color-text-muted)" }}>
+                  {truncateAddress(publicKey.toBase58())}
+                </span>
+              </div>
+              <button
+                onClick={() => disconnect()}
+                className="text-xs transition-colors duration-150"
+                style={{ color: "var(--color-gold-dim)" }}
+                onMouseEnter={(e) => { e.currentTarget.style.color = "var(--color-gold)"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.color = "var(--color-gold-dim)"; }}
+              >
+                Disconnect
+              </button>
+            </div>
+          ) : (
+            <button
+              onClick={() => setVisible(true)}
+              className="w-full text-xs font-medium py-1.5 px-2 transition-colors duration-150"
+              style={{
+                border: "1px solid var(--color-gold)",
+                color: "var(--color-gold)",
+                background: "transparent",
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(201,168,76,0.08)"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            >
+              Connect Wallet
+            </button>
+          )}
         </div>
       </div>
     </div>

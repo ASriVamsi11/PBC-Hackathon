@@ -84,3 +84,36 @@
   background: var(--color-gold);
   animation: progressSlide 1.2s ease-in-out infinite;
 }
+
+/* Wallet adapter modal — match MintAI dark gold theme */
+.wallet-adapter-modal-wrapper {
+  background: var(--color-surface) !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 2px !important;
+}
+.wallet-adapter-modal-title {
+  color: var(--color-text) !important;
+  font-family: var(--font-serif) !important;
+  font-weight: 600 !important;
+}
+.wallet-adapter-modal-overlay {
+  background: rgba(0, 0, 0, 0.75) !important;
+}
+.wallet-adapter-button {
+  background: transparent !important;
+  border: 1px solid var(--color-border) !important;
+  border-radius: 2px !important;
+  color: var(--color-text-muted) !important;
+  font-family: var(--font-sans) !important;
+}
+.wallet-adapter-button:hover {
+  background: rgba(201, 168, 76, 0.06) !important;
+  border-color: var(--color-gold) !important;
+  color: var(--color-text) !important;
+}
+.wallet-adapter-modal-list li:not(:last-child) {
+  border-bottom: 1px solid var(--color-border) !important;
+}
+.wallet-adapter-modal-collapse-button {
+  color: var(--color-text-muted) !important;
+}

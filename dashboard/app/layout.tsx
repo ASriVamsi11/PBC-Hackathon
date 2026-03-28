@@ -3,6 +3,7 @@ import { Cormorant_Garamond, DM_Mono, Geist } from "next/font/google";
 import "./globals.css";
 import Sidebar from "./components/Sidebar";
 import { ToastProvider } from "./components/Toast";
+import SolanaWalletProvider from "./components/WalletProvider";
 
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
@@ -34,10 +35,12 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cormorant.variable} ${dmMono.variable} ${geist.variable} h-full antialiased dark`}>
       <body className="min-h-full flex flex-row" style={{ background: "var(--color-bg)", color: "var(--color-text)" }}>
-        <Sidebar />
-        <main className="flex-1" style={{ background: "var(--color-bg)" }}>
-          <ToastProvider>{children}</ToastProvider>
-        </main>
+        <SolanaWalletProvider>
+          <Sidebar />
+          <main className="flex-1" style={{ background: "var(--color-bg)" }}>
+            <ToastProvider>{children}</ToastProvider>
+          </main>
+        </SolanaWalletProvider>
       </body>
     </html>
   );

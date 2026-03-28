@@ -2,6 +2,8 @@
 
 import { useState, useRef, useEffect } from "react";
 import { callAnalyze, callGenerate, callPredict, chatStream } from "../../lib/api";
+import { callPaidAnalyze, callPaidGenerate, callPaidPredict } from "../../lib/paidApi";
+import { useX402 } from "../../lib/useX402";
 import { useToast } from "../components/Toast";
 import type { PlaygroundResponse, ChatMessage } from "../../lib/types";
 
@@ -52,13 +54,26 @@ function EndpointCard({ endpoint }: { endpoint: EndpointConfig }) {
   const [response, setResponse] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { canPay, paidFetch } = useX402();
+
+  const PAID_CALLERS: Record<string, (pf: NonNullable<typeof paidFetch>, v: string) => Promise<PlaygroundResponse>> = {
+    analyze: callPaidAnalyze,
+    generate: callPaidGenerate,
+    predict: callPaidPredict,
+  };
 
   const handleRun = async () => {
     if (!input.trim()) return;
     setLoading(true);
     setResponse(null);
     try {
-      const data = await endpoint.fetcher(input.trim());
+      let data: PlaygroundResponse;
+      if (canPay && paidFetch && PAID_CALLERS[endpoint.key]) {
+        data = await PAID_CALLERS[endpoint.key](paidFetch, input.trim());
+        toast(`Paid ${endpoint.price} via x402`, "success");
+      } else {
+        data = await endpoint.fetcher(input.trim());
+      }
       const text = data.result
         .filter((block: { type: string; text?: string }) => block.type === "text")
         .map((block: { type: string; text?: string }) => block.text || "")
@@ -81,12 +96,23 @@ function EndpointCard({ endpoint }: { endpoint: EndpointConfig }) {
           <h3 className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>{endpoint.label}</h3>
           <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>{endpoint.description}</p>
         </div>
-        <span
-          className="num text-xs px-2 py-1"
-          style={{ background: "rgba(201,168,76,0.12)", color: "var(--color-gold)", border: "1px solid rgba(201,168,76,0.2)" }}
-        >
-          {endpoint.price}
-        </span>
+        <div className="flex items-center gap-2">
+          {canPay ? (
+            <span className="text-xs px-2 py-0.5" style={{ background: "rgba(46,125,82,0.15)", color: "var(--color-success)", border: "1px solid rgba(46,125,82,0.3)" }}>
+              Paid
+            </span>
+          ) : (
+            <span className="text-xs px-2 py-0.5" style={{ background: "rgba(201,168,76,0.06)", color: "var(--color-gold-dim)", border: "1px solid rgba(201,168,76,0.1)" }}>
+              Free Demo
+            </span>
+          )}
+          <span
+            className="num text-xs px-2 py-1"
+            style={{ background: "rgba(201,168,76,0.12)", color: "var(--color-gold)", border: "1px solid rgba(201,168,76,0.2)" }}
+          >
+            {endpoint.price}
+          </span>
+        </div>
       </div>
 
       <div className="space-y-3">
@@ -316,6 +342,7 @@ function ChatView() {
 export default function PlaygroundPage() {
   const [advancedMode, setAdvancedMode] = useState(false);
   const [chatKey, setChatKey] = useState(0);
+  const { canPay } = useX402();
 
   return (
     <div className={advancedMode ? "p-8 space-y-6" : "flex flex-col h-full"}>
@@ -361,6 +388,18 @@ export default function PlaygroundPage() {
       {/* Content */}
       {advancedMode ? (
         <>
+          {!canPay && (
+            <div
+              className="flex items-center gap-3 px-4 py-3 text-xs"
+              style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.15)", color: "var(--color-text-muted)" }}
+            >
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} style={{ color: "var(--color-gold)" }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 9m18 0V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v3" />
+              </svg>
+              Connect your wallet to use paid endpoints — real Solana devnet USDC micropayments via x402
+            </div>
+          )}
+
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             {ENDPOINTS.map((ep) => (
               <EndpointCard key={ep.key} endpoint={ep} />

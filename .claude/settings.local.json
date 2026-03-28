@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(node -e \"const kit = require\\(''''@solana/kit''''\\); const keys = Object.keys\\(kit\\).filter\\(k => k.toLowerCase\\(\\).includes\\(''''transaction''''\\)\\); console.log\\(keys.join\\(''''\\\\n''''\\)\\)\")",
+      "Bash(node -e \"const kit = require\\(''''@solana/kit''''\\); const keys = Object.keys\\(kit\\).filter\\(k => k.toLowerCase\\(\\).includes\\(''''encoder''''\\) || k.toLowerCase\\(\\).includes\\(''''decoder''''\\) || k.toLowerCase\\(\\).includes\\(''''compile''''\\) || k.toLowerCase\\(\\).includes\\(''''signer''''\\)\\); console.log\\(keys.sort\\(\\).join\\(''''\\\\n''''\\)\\)\")",
+      "Bash(node:*)"
+    ]
+  }
+}

@@ -1,52 +1,73 @@
-# Mint Ai — Self-Sustaining AI Agents with x402 Payments & Filecoin Memory
+# Mint AI — Self-Sustaining AI Agents with x402 Payments & Filecoin Memory
 
 > **Hackathon submission targeting Bounty 4 (x402 Micropayments) + Bounty 5 (Filecoin Infrastructure)**
 
-Mint Ai is a full-stack system that enables AI agents to **earn money autonomously**, **persist their memory** on decentralized storage, and **maintain verifiable on-chain identity** — all without a central operator.
+Mint AI is a full-stack system that enables AI agents to **earn money autonomously**, **persist their memory** on decentralized storage, and **maintain verifiable on-chain identity** — all without a central operator.
 
 ---
 
-## The Core Idea
+## System Architecture
 
-Traditional AI agents are stateless, free, and ephemeral. MintAI flips this:
+```mermaid
+graph TD
+    Client["Agent Client\n(Consumer)"]
+    Server["Agent Server\n(Express.js)"]
+    Claude["Claude API\nclaude-sonnet-4"]
+    Memory["Memory Manager\nbuffer → flush"]
+    Filecoin["Filecoin Storage\nvia Lighthouse SDK"]
+    Registry["AgentIdentityRegistry\nSolidity / FEVM"]
+    Solana["Solana Devnet\nx402 Payment Settlement"]
+    Dashboard["Dashboard\nNext.js Monitoring UI"]
 
-1. **Agents charge for their services** via the x402 payment protocol (HTTP 402 + Solana micropayments)
-2. **Agents remember everything** — each request is batched and stored permanently on Filecoin via Lighthouse
-3. **Agents have on-chain identity** — reputation, earnings, and memory CIDs are anchored in a Solidity smart contract on Filecoin FEVM
-4. **Anyone can verify an agent's history** — by reading the contract and retrieving memory batches from Filecoin
-
----
-
-## Architecture Overview
-
+    Client -- "GET /api/analyze" --> Server
+    Server -- "HTTP 402 + price" --> Client
+    Client -- "Sign & pay $0.01 USDC" --> Solana
+    Solana -- "Payment proof" --> Server
+    Server -- "Prompt" --> Claude
+    Claude -- "Response" --> Server
+    Server --> Memory
+    Memory -- "every 10 requests" --> Filecoin
+    Filecoin -- "CID" --> Registry
+    Registry -- "on-chain state" --> Dashboard
+    Server -- "earnings / status" --> Dashboard
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│                       Mint AI SYSTEM                       │
-│                                                                 │
-│   ┌──────────────┐   HTTP 402   ┌──────────────┐   ┌─────────┐ │
-│   │ Agent Client │─────────────▶│ Agent Server │──▶│ Claude  │ │
-│   │ (Consumer)   │◀─────────────│ (Express)    │   │   API   │ │
-│   └──────────────┘   Solana     └──────┬───────┘   └─────────┘ │
-│                      Payment           │                        │
-│                                 ┌──────▼────────┐              │
-│                                 │ Memory Manager│              │
-│                                 │ (buffer→flush)│              │
-│                                 └──────┬────────┘              │
-│                                        │ Lighthouse SDK         │
-│                                 ┌──────▼────────┐              │
-│                                 │   Filecoin    │ ←── CIDs     │
-│                                 │   Storage     │              │
-│                                 └──────┬────────┘              │
-│                                        │ CID anchor            │
-│                                 ┌──────▼──────────────────┐    │
-│                                 │ AgentIdentityRegistry   │    │
-│                                 │ (Solidity / FEVM)       │    │
-│                                 └─────────────────────────┘    │
-│                                                                 │
-│   ┌─────────────────────────────────────────────────────────┐  │
-│   │  Dashboard (Next.js)  ·  Overview · Storage · Identity  │  │
-│   └─────────────────────────────────────────────────────────┘  │
-└─────────────────────────────────────────────────────────────────┘
+
+---
+
+## Payment Flow
+
+```mermaid
+sequenceDiagram
+    participant C as Agent Client
+    participant S as Agent Server
+    participant X as x402 Facilitator
+    participant Sol as Solana Devnet
+    participant AI as Claude API
+
+    C->>S: GET /api/analyze?query=bitcoin
+    S-->>C: 402 Payment Required ($0.01 USDC)
+    C->>X: Sign payment via @x402/fetch
+    X->>Sol: Settle micropayment
+    Sol-->>X: Confirmed
+    X-->>C: Payment proof
+    C->>S: Retry request + payment proof
+    S->>AI: Claude prompt
+    AI-->>S: Analysis result
+    S-->>C: 200 OK + result
+```
+
+---
+
+## Memory Persistence Flow
+
+```mermaid
+flowchart LR
+    Req["Paid Request"] --> Buffer["Memory Buffer"]
+    Buffer -- "10 requests" --> Batch["Serialize Batch"]
+    Batch --> Lighthouse["Lighthouse SDK"]
+    Lighthouse --> FC["Filecoin Storage"]
+    FC -- "CID" --> Contract["AgentIdentityRegistry\nFEVM"]
+    Contract --> Dashboard["Dashboard\nCID viewer"]
 ```
 
 ---
@@ -55,13 +76,13 @@ Traditional AI agents are stateless, free, and ephemeral. MintAI flips this:
 
 ### 1. Agent Server (`agent-server/`)
 
-An Express.js server that offers Claude-powered AI services behind x402 payment gates.
+An Express.js server offering Claude-powered AI services behind x402 payment gates.
 
 **Paid Endpoints:**
 
 | Endpoint | Price | Description |
 |----------|-------|-------------|
-| `GET /api/analyze?query=<text>` | $0.01 USDC | Deep analysis via Claude — key insights, trends |
+| `GET /api/analyze?query=<text>` | $0.01 USDC | Deep analysis via Claude |
 | `GET /api/generate?prompt=<text>` | $0.005 USDC | Content generation via Claude |
 | `GET /api/predict?topic=<text>` | $0.02 USDC | Market prediction & trend analysis |
 
@@ -69,105 +90,102 @@ An Express.js server that offers Claude-powered AI services behind x402 payment 
 
 | Endpoint | Description |
 |----------|-------------|
-| `GET /api/status` | Agent name, wallet address, earnings, uptime |
-| `GET /api/storage/memories` | List all memory batch CIDs stored on Filecoin |
+| `GET /api/status` | Agent name, wallet, earnings, uptime |
+| `GET /api/storage/memories` | List all memory batch CIDs on Filecoin |
 | `GET /api/storage/memory/:cid` | Retrieve a specific memory batch |
 | `GET /api/storage/identity` | Agent's on-chain identity data |
 | `POST /api/storage/flush` | Manually flush memory buffer to Filecoin |
 
-**How payment works:**
-
-1. Client calls `GET /api/analyze?query=bitcoin`
-2. Server returns HTTP `402 Payment Required` with price: `$0.01 USDC`
-3. Client signs a Solana payment using `@x402/fetch`
-4. Payment proof returned to server, settled on Solana Devnet via the x402 facilitator
-5. Server processes the request with Claude and returns the result
-6. Earnings are tracked locally and eventually recorded on-chain
-
-**Memory persistence:**
-
-Each paid request is stored in a memory buffer. Every 10 requests, the buffer is serialized and uploaded to Filecoin via the Lighthouse SDK. The resulting CID is stored in the on-chain registry contract, creating a permanent, verifiable audit trail of everything the agent has ever done.
-
 ---
 
-### 2. Agent Client (`agent-client/`)
-
-A demo consumer that calls the agent server and automatically handles x402 payment flows.
-
-```bash
-cd agent-client && npm run consume
-```
-
-This runs three sample calls:
-- Analyze bitcoin price trends (`$0.01`)
-- Generate a decentralized AI marketplace intro (`$0.005`)
-- Predict Solana DeFi ecosystem trends (`$0.02`)
-
-Total spend per demo run: `$0.035 USDC`
-
-The client uses `@x402/fetch` which transparently intercepts 402 responses, signs the payment on Solana, and retries the request — all without any manual intervention.
-
----
-
-### 3. Smart Contracts (`contracts/`)
+### 2. Smart Contract (`contracts/`)
 
 **`AgentIdentityRegistry.sol`** — deployed on Filecoin FEVM Calibration Testnet (Chain ID: 314159)
 
-Each registered agent has an on-chain struct:
+```mermaid
+classDiagram
+    class Agent {
+        address walletAddress
+        string name
+        string dataCID
+        uint256 reputationScore
+        uint256 totalEarnings
+        uint256 totalRequests
+        uint256 registrationTime
+        bool isActive
+    }
 
-```solidity
-struct Agent {
-    address walletAddress;
-    string  name;
-    string  dataCID;          // IPFS/Filecoin CID of latest memory index
-    uint256 reputationScore;  // 0–1000, starts at 500
-    uint256 totalEarnings;    // in wei
-    uint256 totalRequests;
-    uint256 registrationTime;
-    bool    isActive;
-}
+    class AgentIdentityRegistry {
+        +registerAgent(name, dataCID)
+        +updateDataCID(newCID)
+        +recordEarnings(agent, amount, requests)
+        +updateReputation(agent, score)
+        +getAllAgents()
+    }
+
+    AgentIdentityRegistry --> Agent
 ```
-
-Key contract functions:
-- `registerAgent(name, dataCID)` — agent self-registers with reputation 500
-- `updateDataCID(newCID)` — agent updates its memory pointer after each Filecoin flush
-- `recordEarnings(agent, amount, requests)` — logs earnings on-chain
-- `updateReputation(agent, score)` — owner-controlled reputation scoring
-- `getAllAgents()` — enumerate all registered agents
-
-**Why Filecoin FEVM?** The smart contract lives on Filecoin, the same network as the agent's stored memory. This keeps the on-chain index pointer and the actual data on the same decentralized infrastructure.
 
 ---
 
-### 4. Dashboard (`dashboard/`)
+### 3. Dashboard (`dashboard/`)
 
-A Next.js 16 + React 19 monitoring interface with four views:
+```mermaid
+graph LR
+    Overview["Overview\nEarnings · Balance · Chart"]
+    Storage["Storage\nFilecoin CIDs · Timestamps"]
+    Identity["Identity\nReputation · Wallet · Chain"]
+    Activity["Activity\nReal-time Event Feed"]
 
-| Page | What you see |
-|------|-------------|
-| **Overview** | Total earnings, expenses, balance, request count, weekly earnings chart |
-| **Storage** | Memory batches on Filecoin with CIDs, timestamps, sizes, gateway links |
-| **Identity** | Reputation score (0–1000), tier visualization, wallet address, chain info |
-| **Activity** | Real-time event feed — earnings, storage flushes, reputation changes, system events |
-
-Run locally:
-```bash
-cd dashboard && npm run dev   # http://localhost:3000
+    Sidebar --> Overview
+    Sidebar --> Storage
+    Sidebar --> Identity
+    Sidebar --> Activity
 ```
 
 ---
 
 ## Technology Stack
 
-| Layer | Technology |
-|-------|-----------|
-| AI model | Claude (`claude-sonnet-4-20250514`) via `@anthropic-ai/sdk` |
-| Payment protocol | x402 — `@x402/express`, `@x402/fetch`, `@x402/svm` |
-| Payment settlement | Solana Devnet |
-| Decentralized storage | Filecoin via `@lighthouse-web3/sdk` |
-| Smart contracts | Solidity 0.8.24 + Hardhat on Filecoin FEVM |
-| Backend | Node.js 20 + Express + TypeScript |
-| Frontend | Next.js 16.2 + React 19 + TailwindCSS 4 + Chart.js |
+```mermaid
+graph TD
+    subgraph Frontend
+        Next["Next.js 16.2"]
+        React["React 19"]
+        Tailwind["TailwindCSS 4"]
+        Chart["Chart.js"]
+    end
+
+    subgraph Backend
+        Express["Express + TypeScript"]
+        AnthropicSDK["@anthropic-ai/sdk\nclaude-sonnet-4"]
+    end
+
+    subgraph Payments
+        X402["x402 Protocol\n@x402/express · @x402/fetch"]
+        SolDev["Solana Devnet"]
+    end
+
+    subgraph Storage
+        Lighthouse["Lighthouse SDK"]
+        FilecoinNet["Filecoin Network"]
+    end
+
+    subgraph Contracts
+        Solidity["Solidity 0.8.24"]
+        Hardhat["Hardhat"]
+        FEVM["Filecoin FEVM\nCalibration Testnet"]
+    end
+
+    Next --> Express
+    Express --> AnthropicSDK
+    Express --> X402
+    X402 --> SolDev
+    Express --> Lighthouse
+    Lighthouse --> FilecoinNet
+    Solidity --> Hardhat
+    Hardhat --> FEVM
+```
 
 ---
 
@@ -175,10 +193,10 @@ cd dashboard && npm run dev   # http://localhost:3000
 
 ### Prerequisites
 - Node.js 20+
-- Solana wallet with Devnet SOL (for x402 payments)
-- Filecoin Calibration testnet wallet with tFIL (for contract deployment)
+- Solana wallet with Devnet SOL
+- Filecoin Calibration testnet wallet with tFIL
 - Anthropic API key
-- Lighthouse API key (for Filecoin storage)
+- Lighthouse API key
 
 ### 1. Deploy the smart contract
 
@@ -194,7 +212,7 @@ npm run deploy              # outputs: REGISTRY_CONTRACT_ADDRESS
 
 ```bash
 cd agent-server
-cp .env.example .env        # fill in all keys + REGISTRY_CONTRACT_ADDRESS from step 1
+cp .env.example .env        # fill in all keys + REGISTRY_CONTRACT_ADDRESS
 npm install
 npm run dev                 # http://localhost:4021
 ```
@@ -217,10 +235,12 @@ PORT=4021
 
 ```bash
 cd agent-client
-cp .env.example .env        # fill in SVM_PRIVATE_KEY (a different Solana wallet)
+cp .env.example .env        # fill in SVM_PRIVATE_KEY (different Solana wallet)
 npm install
 npm run consume             # calls 3 endpoints, auto-pays with x402
 ```
+
+Total spend per demo run: `$0.035 USDC`
 
 ### 4. Start the dashboard
 
@@ -232,41 +252,18 @@ npm run dev                 # http://localhost:3000
 
 ---
 
-## How It All Connects
-
-```
-Consumer calls /api/analyze
-        │
-        ├── Server returns HTTP 402
-        │
-        ├── Client pays $0.01 on Solana via @x402/fetch
-        │
-        ├── Server receives payment proof, calls Claude API
-        │
-        ├── Result stored in memory buffer
-        │
-        ├── (every 10 requests) memory batch → Lighthouse → Filecoin CID
-        │
-        ├── CID written to AgentIdentityRegistry on FEVM
-        │
-        └── Dashboard reflects earnings, CIDs, reputation in real-time
-```
-
----
-
 ## Bounty Alignment
 
 ### Bounty 4 — x402 Micropayments
-- Uses `@x402/express` middleware to gate three AI service endpoints
-- Uses `@x402/fetch` on the client to automatically handle 402 → pay → retry
+- `@x402/express` middleware gates three AI service endpoints
+- `@x402/fetch` on the client automatically handles 402 → pay → retry
 - Payments settle on Solana Devnet via the x402 facilitator at `x402.org`
-- Demonstrates a viable economic model for AI agent services
 
 ### Bounty 5 — Filecoin Infrastructure
 - Every agent request is eventually persisted to Filecoin via Lighthouse SDK
-- Memory batches are addressable by CID and retrievable from any Filecoin gateway
-- `AgentIdentityRegistry` smart contract deployed on Filecoin FEVM anchors each agent's memory index on-chain
-- The contract's `dataCID` field links the on-chain record to the off-chain Filecoin data — creating a verifiable, tamper-proof history of the agent's entire operation
+- Memory batches are addressable by CID from any Filecoin gateway
+- `AgentIdentityRegistry` on Filecoin FEVM anchors each agent's memory index on-chain
+- The `dataCID` field links on-chain records to off-chain Filecoin data — creating a verifiable, tamper-proof audit trail
 
 ---
 
@@ -286,15 +283,15 @@ Consumer calls /api/analyze
 PBC-Hackathon/
 ├── agent-server/          # Express + x402 + Claude + Lighthouse
 │   └── src/
-│       ├── index.ts       # Server entry point + route definitions
-│       ├── config.ts      # Environment config loader
+│       ├── index.ts       # Server entry point + routes
+│       ├── config.ts      # Environment config
 │       ├── agent/
-│       │   ├── memory.ts  # Memory buffer + Filecoin flush logic
+│       │   ├── memory.ts  # Memory buffer + Filecoin flush
 │       │   └── wallet.ts  # Earnings tracker
 │       └── services/
 │           ├── claude.ts  # Anthropic SDK wrapper
 │           ├── storage.ts # Lighthouse SDK wrapper
-│           └── identity.ts# Contract interaction helpers
+│           └── identity.ts# Contract interaction
 ├── agent-client/          # x402 consumer demo
 │   └── src/
 │       ├── index.ts       # x402 client setup
