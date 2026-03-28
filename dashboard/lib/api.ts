@@ -1,4 +1,4 @@
-export const AGENT_URL = process.env.NEXT_PUBLIC_AGENT_URL || "http://localhost:4021";
+export const AGENT_URL = (process.env.NEXT_PUBLIC_AGENT_URL || "http://localhost:4021").replace(/\/+$/, "");
 
 export async function getStatus() {
   const res = await fetch(`${AGENT_URL}/api/status`);
