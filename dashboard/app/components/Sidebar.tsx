@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { useWallet } from "@solana/wallet-adapter-react";
 import { useWalletModal } from "@solana/wallet-adapter-react-ui";
@@ -59,8 +60,15 @@ function truncateAddress(addr: string) {
 
 export default function Sidebar() {
   const pathname = usePathname();
-  const { connected, publicKey, disconnect } = useWallet();
-  const { setVisible } = useWalletModal();
+  const { connected, connecting, wallet, publicKey, disconnect, connect } = useWallet();
+  const { setVisible, visible } = useWalletModal();
+
+  // After user picks a wallet in the modal, call connect() to trigger the extension popup
+  useEffect(() => {
+    if (!visible && wallet && !connected && !connecting) {
+      connect().catch(() => undefined);
+    }
+  }, [visible, wallet, connected, connecting, connect]);
 
   return (
     <div

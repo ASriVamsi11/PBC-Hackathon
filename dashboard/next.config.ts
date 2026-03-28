@@ -1,4 +1,5 @@
 import type { NextConfig } from "next";
+import webpack from "webpack";
 
 const nextConfig: NextConfig = {
   turbopack: {},
@@ -15,6 +16,9 @@ const nextConfig: NextConfig = {
         path: false,
       };
     }
+    config.plugins.push(
+      new webpack.IgnorePlugin({ resourceRegExp: /^pino-pretty$/ })
+    );
     return config;
   },
 };
