@@ -88,7 +88,7 @@ export default function Sidebar() {
             <h1 className="font-serif font-semibold text-sm" style={{ color: "var(--color-text)" }}>
               MintAI
             </h1>
-            <p className="label-section" style={{ fontSize: "9px" }}>Dashboard</p>
+            <p className="label-section" style={{ fontSize: "11px" }}>Dashboard</p>
           </div>
         </div>
       </div>
@@ -123,7 +123,7 @@ export default function Sidebar() {
                 }}
               >
                 {link.icon}
-                <span className="text-xs font-medium" style={{ fontFamily: "var(--font-sans)" }}>
+                <span className="text-sm font-medium" style={{ fontFamily: "var(--font-sans)" }}>
                   {link.label}
                 </span>
               </Link>

@@ -138,7 +138,7 @@ function EndpointCard({ endpoint }: { endpoint: EndpointConfig }) {
         <button
           onClick={handleRun}
           disabled={loading || !input.trim()}
-          className="w-full py-2.5 text-sm font-semibold transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+          className="w-full py-2.5 text-sm font-semibold transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
           style={{
             background: "var(--color-gold)",
             color: "var(--color-bg)",
@@ -318,7 +318,7 @@ function ChatView() {
           <button
             onClick={handleSend}
             disabled={isStreaming || !input.trim()}
-            className="px-3 py-2.5 transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-3 py-2.5 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               background: "var(--color-gold)",
               color: "var(--color-bg)",

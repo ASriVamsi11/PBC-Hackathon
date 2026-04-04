@@ -9,7 +9,7 @@ import type { ActivityEvent } from "../../lib/types";
 
 const EVENT_STYLES: Record<string, { marker: string; color: string }> = {
   earning: { marker: "#C9A84C", color: "var(--color-gold)" },
-  storage: { marker: "#4A6FA5", color: "#4A6FA5" },
+  storage: { marker: "#6B8FC0", color: "#6B8FC0" },
   reputation: { marker: "#C9A84C", color: "var(--color-gold-dim)" },
   system: { marker: "#8A8070", color: "var(--color-text-muted)" },
 };

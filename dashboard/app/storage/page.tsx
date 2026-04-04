@@ -81,7 +81,7 @@ export default function StoragePage() {
           <button
             onClick={handleFlush}
             disabled={data?.currentBufferSize === 0 || flushing}
-            className="mt-2 px-3 py-1.5 text-xs font-semibold transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="mt-2 px-3 py-1.5 text-xs font-semibold transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{
               background: "var(--color-gold)",
               color: "var(--color-bg)",

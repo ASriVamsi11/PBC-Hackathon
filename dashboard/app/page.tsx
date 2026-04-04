@@ -75,7 +75,7 @@ export default function Overview() {
     plugins: {
       legend: {
         display: true,
-        labels: { color: "#8A8070", font: { size: 11, family: "DM Mono" } },
+        labels: { color: "#B0A690", font: { size: 12, family: "DM Mono" } },
       },
       tooltip: {
         backgroundColor: "#1A1A1A",
@@ -90,11 +90,11 @@ export default function Overview() {
       y: {
         beginAtZero: true,
         grid: { color: "#1E1E1E" },
-        ticks: { color: "#8A8070", font: { size: 10, family: "DM Mono" } },
+        ticks: { color: "#B0A690", font: { size: 11, family: "DM Mono" } },
       },
       x: {
         grid: { display: false },
-        ticks: { color: "#8A8070", font: { size: 10, family: "DM Mono" }, maxTicksLimit: 10 },
+        ticks: { color: "#B0A690", font: { size: 11, family: "DM Mono" }, maxTicksLimit: 10 },
       },
     },
   };
