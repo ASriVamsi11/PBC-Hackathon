@@ -42,7 +42,7 @@ export default function StoragePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           {[...Array(3)].map((_, i) => <SkeletonCard key={i} />)}
         </div>
-        <div style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", padding: "24px" }}>
+        <div style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: "6px", padding: "24px" }}>
           <div className="h-5 w-40 rounded animate-pulse mb-6" style={{ background: "var(--color-surface-2)" }} />
           <table className="w-full text-sm">
             <tbody>
@@ -62,7 +62,7 @@ export default function StoragePage() {
     <div className="p-8 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="font-serif text-2xl font-semibold" style={{ color: "var(--color-text)" }}>
+        <h1 className="font-serif text-2xl" style={{ color: "var(--color-text)", fontWeight: 400 }}>
           Storage
         </h1>
         <p className="label-section mt-1">Memory archives on Filecoin &middot; {batches.length} records</p>
@@ -70,32 +70,48 @@ export default function StoragePage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="card-accent animate-fade-in" style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", padding: "20px" }}>
-          <p className="label-section mb-2">Total Batches</p>
-          <p className="num text-xl font-semibold" style={{ color: "var(--color-text)" }}>{data?.totalBatches || 0}</p>
+        <div
+          className="animate-fade-in"
+          style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: "6px", padding: "24px" }}
+        >
+          <p className="label-section mb-3">Total Batches</p>
+          <p className="num font-serif" style={{ color: "var(--color-text)", fontSize: "1.75rem", fontWeight: 500 }}>
+            {data?.totalBatches || 0}
+          </p>
           <p className="text-xs mt-1.5" style={{ color: "var(--color-text-muted)" }}>flushed to Filecoin</p>
         </div>
-        <div className="card-accent animate-fade-in" style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", padding: "20px" }}>
-          <p className="label-section mb-2">Buffer Size</p>
-          <p className="num text-xl font-semibold" style={{ color: "var(--color-text)" }}>{data?.currentBufferSize || 0}</p>
+
+        <div
+          className="animate-fade-in"
+          style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: "6px", padding: "24px" }}
+        >
+          <p className="label-section mb-3">Buffer Size</p>
+          <p className="num font-serif" style={{ color: "var(--color-text)", fontSize: "1.75rem", fontWeight: 500 }}>
+            {data?.currentBufferSize || 0}
+          </p>
           <button
             onClick={handleFlush}
             disabled={data?.currentBufferSize === 0 || flushing}
-            className="mt-2 px-3 py-1.5 text-xs font-semibold transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="mt-3 px-3 py-1.5 text-xs transition-opacity duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
             style={{
-              background: "var(--color-gold)",
+              background: "var(--color-text)",
               color: "var(--color-bg)",
-              borderRadius: "3px",
+              borderRadius: "4px",
+              fontFamily: "var(--font-sans)",
             }}
-            onMouseEnter={(e) => { if (!flushing) e.currentTarget.style.background = "var(--color-gold-bright)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "var(--color-gold)"; }}
+            onMouseEnter={(e) => { if (!flushing) e.currentTarget.style.opacity = "0.8"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
           >
             {flushing ? "Flushing..." : "Flush Memory"}
           </button>
         </div>
-        <div className="card-accent animate-fade-in" style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", padding: "20px" }}>
-          <p className="label-section mb-2">Index CID</p>
-          <p className="num text-sm break-all" style={{ color: "var(--color-gold)" }}>
+
+        <div
+          className="animate-fade-in"
+          style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: "6px", padding: "24px" }}
+        >
+          <p className="label-section mb-3">Index CID</p>
+          <p className="num text-sm break-all" style={{ color: "var(--color-accent)" }}>
             {data?.indexCID ? truncateCID(data.indexCID) : "None yet"}
           </p>
           <p className="text-xs mt-1.5" style={{ color: "var(--color-text-muted)" }}>latest memory index</p>
@@ -103,8 +119,11 @@ export default function StoragePage() {
       </div>
 
       {/* Table */}
-      <div className="animate-fade-in overflow-hidden" style={{ border: "1px solid var(--color-border)" }}>
-        <div className="px-5 py-4" style={{ background: "var(--color-surface)" }}>
+      <div
+        className="animate-fade-in overflow-hidden"
+        style={{ border: "1px solid var(--color-border)", borderRadius: "6px" }}
+      >
+        <div className="px-5 py-4" style={{ background: "var(--color-surface)", borderBottom: "1px solid var(--color-border)" }}>
           <p className="label-section">Memory Archives</p>
         </div>
         {batches.length === 0 ? (
@@ -118,11 +137,11 @@ export default function StoragePage() {
             <table className="w-full text-xs">
               <thead>
                 <tr style={{ borderBottom: "1px solid var(--color-border)" }}>
-                  <th className="text-left px-5 py-3 label-section font-semibold">Batch</th>
-                  <th className="text-left px-5 py-3 label-section font-semibold">CID</th>
-                  <th className="text-right px-5 py-3 label-section font-semibold">Entries</th>
-                  <th className="text-right px-5 py-3 label-section font-semibold">Flushed At</th>
-                  <th className="text-right px-5 py-3 label-section font-semibold">Action</th>
+                  <th className="text-left px-5 py-3 label-section">Batch</th>
+                  <th className="text-left px-5 py-3 label-section">CID</th>
+                  <th className="text-right px-5 py-3 label-section">Entries</th>
+                  <th className="text-right px-5 py-3 label-section">Flushed At</th>
+                  <th className="text-right px-5 py-3 label-section">Action</th>
                 </tr>
               </thead>
               <tbody>
@@ -134,7 +153,7 @@ export default function StoragePage() {
                   >
                     <td className="px-5 py-3" style={{ color: "var(--color-text)" }}>#{batch.batchId}</td>
                     <td className="px-5 py-3">
-                      <code className="num" style={{ color: "var(--color-gold)" }}>
+                      <code className="num" style={{ color: "var(--color-accent)" }}>
                         {truncateCID(batch.cid)}
                       </code>
                     </td>
@@ -147,12 +166,12 @@ export default function StoragePage() {
                         href={`https://gateway.lighthouse.storage/ipfs/${batch.cid}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-xs font-medium transition-colors duration-150"
-                        style={{ color: "var(--color-gold)", borderBottom: "1px solid transparent" }}
-                        onMouseEnter={(e) => { e.currentTarget.style.borderBottomColor = "var(--color-gold)"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.borderBottomColor = "transparent"; }}
+                        className="text-xs transition-opacity duration-150"
+                        style={{ color: "var(--color-accent)" }}
+                        onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.7"; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
                       >
-                        View
+                        View ↗
                       </Link>
                     </td>
                   </tr>
@@ -164,24 +183,27 @@ export default function StoragePage() {
       </div>
 
       {/* Filecoin Info */}
-      <div className="animate-fade-in" style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", padding: "20px" }}>
-        <p className="label-section mb-3">Filecoin Storage</p>
+      <div
+        className="animate-fade-in"
+        style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", borderRadius: "6px", padding: "20px" }}
+      >
+        <p className="label-section mb-4">Filecoin Storage</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-xs">
           <div>
-            <p style={{ color: "var(--color-text-muted)" }}>Network</p>
-            <p className="mt-0.5" style={{ color: "var(--color-text)" }}>Filecoin (Lighthouse)</p>
+            <p className="label-section mb-1" style={{ fontSize: "9px" }}>Network</p>
+            <p style={{ color: "var(--color-text)" }}>Filecoin (Lighthouse)</p>
           </div>
           <div>
-            <p style={{ color: "var(--color-text-muted)" }}>Deal Status</p>
-            <p className="mt-0.5" style={{ color: "var(--color-success)" }}>Active</p>
+            <p className="label-section mb-1" style={{ fontSize: "9px" }}>Deal Status</p>
+            <p style={{ color: "var(--color-success)" }}>Active</p>
           </div>
           <div>
-            <p style={{ color: "var(--color-text-muted)" }}>Provider</p>
-            <p className="mt-0.5" style={{ color: "var(--color-text)" }}>Lighthouse Protocol</p>
+            <p className="label-section mb-1" style={{ fontSize: "9px" }}>Provider</p>
+            <p style={{ color: "var(--color-text)" }}>Lighthouse Protocol</p>
           </div>
           <div>
-            <p style={{ color: "var(--color-text-muted)" }}>Gateway</p>
-            <p className="mt-0.5 num" style={{ color: "var(--color-text)" }}>gateway.lighthouse.storage</p>
+            <p className="label-section mb-1" style={{ fontSize: "9px" }}>Gateway</p>
+            <p className="num" style={{ color: "var(--color-text)" }}>gateway.lighthouse.storage</p>
           </div>
         </div>
       </div>

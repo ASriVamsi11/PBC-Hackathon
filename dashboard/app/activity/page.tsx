@@ -8,10 +8,10 @@ import { ErrorState } from "../components/ErrorState";
 import type { ActivityEvent } from "../../lib/types";
 
 const EVENT_STYLES: Record<string, { marker: string; color: string }> = {
-  earning: { marker: "#C9A84C", color: "var(--color-gold)" },
-  storage: { marker: "#4A6FA5", color: "#4A6FA5" },
-  reputation: { marker: "#C9A84C", color: "var(--color-gold-dim)" },
-  system: { marker: "#8A8070", color: "var(--color-text-muted)" },
+  earning:    { marker: "#CC785C", color: "var(--color-accent)" },
+  storage:    { marker: "#9B9590", color: "var(--color-neutral)" },
+  reputation: { marker: "#CC785C", color: "var(--color-accent)" },
+  system:     { marker: "#9B9590", color: "var(--color-text-muted)" },
 };
 
 export default function ActivityPage() {
@@ -62,18 +62,18 @@ export default function ActivityPage() {
   if (error) return <ErrorState message={error} onRetry={refetch} />;
 
   const FILTERS = [
-    { value: "all", label: "All" },
-    { value: "earning", label: "Earnings" },
-    { value: "storage", label: "Storage" },
+    { value: "all",        label: "All" },
+    { value: "earning",    label: "Earnings" },
+    { value: "storage",    label: "Storage" },
     { value: "reputation", label: "Reputation" },
-    { value: "system", label: "System" },
+    { value: "system",     label: "System" },
   ];
 
   return (
     <div className="p-8 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="font-serif text-2xl font-semibold" style={{ color: "var(--color-text)" }}>
+        <h1 className="font-serif text-2xl" style={{ color: "var(--color-text)", fontWeight: 400 }}>
           Activity Feed
         </h1>
         <p className="label-section mt-1">Auto-refreshes every 5s</p>
@@ -81,10 +81,10 @@ export default function ActivityPage() {
 
       {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <StatCard label="Total Earnings" value={`$${todayEarnings.toFixed(4)}`} sub="from activity events" />
-        <StatCard label="Total Events" value={String(allEvents.length)} sub="since server start" />
-        <StatCard label="Earning Events" value={String(earningEvents.length)} sub="paid requests served" />
-        <StatCard label="Storage Events" value={String(allEvents.filter((e) => e.type === "storage").length)} sub="Filecoin flushes" />
+        <StatCard label="Total Earnings"   value={`$${todayEarnings.toFixed(4)}`}                                     sub="from activity events" />
+        <StatCard label="Total Events"     value={String(allEvents.length)}                                            sub="since server start" />
+        <StatCard label="Earning Events"   value={String(earningEvents.length)}                                        sub="paid requests served" />
+        <StatCard label="Storage Events"   value={String(allEvents.filter((e) => e.type === "storage").length)}        sub="Filecoin flushes" />
       </div>
 
       {/* Filter */}
@@ -93,13 +93,14 @@ export default function ActivityPage() {
           <button
             key={opt.value}
             onClick={() => setFilter(opt.value)}
-            className="px-3 py-1.5 text-xs font-medium transition-colors duration-150"
+            className="px-3 py-1.5 text-xs transition-opacity duration-150"
             style={{
-              background: filter === opt.value ? "var(--color-gold)" : "transparent",
-              color: filter === opt.value ? "var(--color-bg)" : "var(--color-text-muted)",
-              border: filter === opt.value ? "1px solid var(--color-gold)" : "1px solid var(--color-border)",
-              borderRadius: "3px",
-              fontWeight: filter === opt.value ? 600 : 400,
+              background: filter === opt.value ? "var(--color-text)" : "transparent",
+              color:      filter === opt.value ? "var(--color-bg)"   : "var(--color-text-muted)",
+              border:     filter === opt.value ? "1px solid var(--color-text)" : "1px solid var(--color-border)",
+              borderRadius: "4px",
+              fontWeight: filter === opt.value ? 500 : 400,
+              fontFamily: "var(--font-sans)",
             }}
           >
             {opt.label}
@@ -108,7 +109,13 @@ export default function ActivityPage() {
       </div>
 
       {/* Event Timeline */}
-      <div className="space-y-0" style={{ border: "1px solid var(--color-border)" }}>
+      <div
+        style={{
+          border: "1px solid var(--color-border)",
+          borderRadius: "6px",
+          overflow: "hidden",
+        }}
+      >
         {filteredEvents.length === 0 ? (
           <div className="p-8 text-center" style={{ background: "var(--color-surface)" }}>
             <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>
@@ -126,12 +133,12 @@ export default function ActivityPage() {
               >
                 {/* Marker */}
                 <div className="flex-shrink-0 pt-1.5">
-                  <div className="w-2 h-2 rounded-full" style={{ background: style.marker }} />
+                  <div className="w-1.5 h-1.5 rounded-full" style={{ background: style.marker }} />
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>
+                  <p className="text-sm" style={{ color: "var(--color-text)" }}>
                     {event.title}
                   </p>
                   <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>
@@ -144,7 +151,7 @@ export default function ActivityPage() {
                   <p className="num text-xs" style={{ color: "var(--color-text-muted)" }}>
                     {getTimeAgo(event.timestamp)}
                   </p>
-                  <p className="num text-xs mt-0.5" style={{ color: "var(--color-gold-dim)" }}>
+                  <p className="num text-xs mt-0.5" style={{ color: "var(--color-neutral)" }}>
                     {new Date(event.timestamp).toLocaleTimeString()}
                   </p>
                 </div>
@@ -155,12 +162,20 @@ export default function ActivityPage() {
       </div>
 
       {/* Legend */}
-      <div className="animate-fade-in" style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", padding: "20px" }}>
+      <div
+        className="animate-fade-in"
+        style={{
+          background: "var(--color-surface)",
+          border: "1px solid var(--color-border)",
+          borderRadius: "6px",
+          padding: "20px",
+        }}
+      >
         <p className="label-section mb-3">Event Types</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3 text-xs">
           {Object.entries(EVENT_STYLES).map(([type, style]) => (
             <div key={type} className="flex items-center gap-2">
-              <div className="w-2 h-2 rounded-full" style={{ background: style.marker }} />
+              <div className="w-1.5 h-1.5 rounded-full" style={{ background: style.marker }} />
               <span style={{ color: "var(--color-text-muted)" }} className="capitalize">{type}</span>
             </div>
           ))}
@@ -173,11 +188,21 @@ export default function ActivityPage() {
 function StatCard({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
     <div
-      className="card-accent animate-fade-in"
-      style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", padding: "20px" }}
+      className="animate-fade-in"
+      style={{
+        background: "var(--color-surface)",
+        border: "1px solid var(--color-border)",
+        borderRadius: "6px",
+        padding: "24px",
+      }}
     >
-      <p className="label-section mb-2">{label}</p>
-      <p className="num text-xl font-semibold" style={{ color: "var(--color-text)" }}>{value}</p>
+      <p className="label-section mb-3">{label}</p>
+      <p
+        className="num font-serif"
+        style={{ color: "var(--color-text)", fontSize: "1.75rem", fontWeight: 500 }}
+      >
+        {value}
+      </p>
       <p className="text-xs mt-1.5" style={{ color: "var(--color-text-muted)" }}>{sub}</p>
     </div>
   );
