@@ -27,7 +27,7 @@ export function useToast(): ToastContextValue {
 const TYPE_COLORS: Record<ToastType, { bg: string; border: string; text: string }> = {
   success: { bg: "var(--color-surface)", border: "var(--color-success)", text: "var(--color-success)" },
   error: { bg: "var(--color-surface)", border: "var(--color-danger)", text: "var(--color-danger)" },
-  info: { bg: "var(--color-surface)", border: "var(--color-gold)", text: "var(--color-gold)" },
+  info: { bg: "var(--color-surface)", border: "var(--color-accent)", text: "var(--color-accent)" },
 };
 
 export function ToastProvider({ children }: { children: ReactNode }) {

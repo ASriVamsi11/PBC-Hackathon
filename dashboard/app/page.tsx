@@ -56,13 +56,13 @@ export default function Overview() {
       {
         label: "Cumulative Earnings (USDC)",
         data: dataValues,
-        borderColor: "#C9A84C",
-        backgroundColor: "rgba(201, 168, 76, 0.08)",
+        borderColor: "#1A1A1A",
+        backgroundColor: "transparent",
         borderWidth: 1.5,
-        fill: true,
+        fill: false,
         pointRadius: 2,
-        pointBackgroundColor: "#C9A84C",
-        pointBorderColor: "#C9A84C",
+        pointBackgroundColor: "#1A1A1A",
+        pointBorderColor: "#1A1A1A",
         pointBorderWidth: 0,
         tension: 0.3,
       },
@@ -75,26 +75,28 @@ export default function Overview() {
     plugins: {
       legend: {
         display: true,
-        labels: { color: "#B0A690", font: { size: 12, family: "DM Mono" } },
+        labels: { color: "#9B9590", font: { size: 11, family: "Inter" } },
       },
       tooltip: {
         backgroundColor: "#1A1A1A",
-        borderColor: "#2A2200",
+        borderColor: "#E5E3DC",
         borderWidth: 1,
-        titleColor: "#F0EAD6",
-        bodyColor: "#C9A84C",
+        titleColor: "#F5F4EF",
+        bodyColor: "#F5F4EF",
         bodyFont: { family: "DM Mono" },
+        cornerRadius: 4,
+        boxShadow: "none",
       },
     },
     scales: {
       y: {
         beginAtZero: true,
-        grid: { color: "#1E1E1E" },
-        ticks: { color: "#B0A690", font: { size: 11, family: "DM Mono" } },
+        grid: { color: "#E5E3DC" },
+        ticks: { color: "#9B9590", font: { size: 10, family: "Inter" } },
       },
       x: {
         grid: { display: false },
-        ticks: { color: "#B0A690", font: { size: 11, family: "DM Mono" }, maxTicksLimit: 10 },
+        ticks: { color: "#9B9590", font: { size: 10, family: "Inter" }, maxTicksLimit: 10 },
       },
     },
   };
@@ -131,7 +133,7 @@ export default function Overview() {
     <div className="p-8 space-y-6">
       {/* Header */}
       <div>
-        <h1 className="font-serif text-2xl font-semibold" style={{ color: "var(--color-text)" }}>
+        <h1 className="font-serif text-2xl" style={{ color: "var(--color-text)", fontWeight: 400 }}>
           Overview
         </h1>
         <p className="label-section mt-1">{agentName}</p>
@@ -146,7 +148,15 @@ export default function Overview() {
       </div>
 
       {/* Chart */}
-      <div className="card-accent animate-fade-in" style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", padding: "24px" }}>
+      <div
+        className="animate-fade-in"
+        style={{
+          background: "var(--color-surface)",
+          border: "1px solid var(--color-border)",
+          borderRadius: "6px",
+          padding: "24px",
+        }}
+      >
         <p className="label-section mb-4">Earnings Over Time</p>
         <div className="h-72">
           <Line data={chartData} options={chartOptions} />
@@ -154,25 +164,34 @@ export default function Overview() {
       </div>
 
       {/* Wallet */}
-      <div className="card-accent animate-fade-in" style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", padding: "24px" }}>
+      <div
+        className="animate-fade-in"
+        style={{
+          background: "var(--color-surface)",
+          border: "1px solid var(--color-border)",
+          borderRadius: "6px",
+          padding: "24px",
+        }}
+      >
         <p className="label-section mb-4">Wallet Information</p>
         <div className="space-y-4">
           <div>
             <p className="text-xs mb-1.5" style={{ color: "var(--color-text-muted)" }}>Wallet Address (Solana)</p>
-            <div className="flex items-center gap-2 px-3 py-2" style={{ background: "var(--color-bg)", border: "1px solid var(--color-border)" }}>
-              <code className="num text-sm flex-1" style={{ color: "var(--color-gold)" }}>{walletAddress}</code>
+            <div
+              className="flex items-center gap-2 px-3 py-2"
+              style={{ background: "var(--color-bg)", border: "1px solid var(--color-border)", borderRadius: "4px" }}
+            >
+              <code className="num text-sm flex-1" style={{ color: "var(--color-accent)" }}>{walletAddress}</code>
               <button
-                className="text-xs px-2 py-1 transition-colors duration-150"
-                style={{ color: "var(--color-text-muted)", border: "1px solid var(--color-border)" }}
+                className="text-xs px-2 py-1 transition-opacity duration-150"
+                style={{
+                  color: "var(--color-text-muted)",
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "4px",
+                }}
                 onClick={() => copyAddress(walletAddress)}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.color = "var(--color-gold)";
-                  e.currentTarget.style.borderColor = "var(--color-gold)";
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.color = "var(--color-text-muted)";
-                  e.currentTarget.style.borderColor = "var(--color-border)";
-                }}
+                onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.7"; }}
+                onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
               >
                 Copy
               </button>
@@ -181,11 +200,11 @@ export default function Overview() {
           <div className="grid grid-cols-2 gap-4">
             <div>
               <p className="text-xs mb-1" style={{ color: "var(--color-text-muted)" }}>Network</p>
-              <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>Solana Devnet</p>
+              <p className="text-sm" style={{ color: "var(--color-text)" }}>Solana Devnet</p>
             </div>
             <div>
               <p className="text-xs mb-1" style={{ color: "var(--color-text-muted)" }}>Token</p>
-              <p className="text-sm font-medium" style={{ color: "var(--color-text)" }}>USDC</p>
+              <p className="text-sm" style={{ color: "var(--color-text)" }}>USDC</p>
             </div>
           </div>
         </div>
@@ -197,11 +216,21 @@ export default function Overview() {
 function StatCard({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
     <div
-      className="card-accent animate-fade-in"
-      style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", padding: "20px" }}
+      className="animate-fade-in"
+      style={{
+        background: "var(--color-surface)",
+        border: "1px solid var(--color-border)",
+        borderRadius: "6px",
+        padding: "24px",
+      }}
     >
-      <p className="label-section mb-2">{label}</p>
-      <p className="num text-xl font-semibold" style={{ color: "var(--color-text)" }}>{value}</p>
+      <p className="label-section mb-3">{label}</p>
+      <p
+        className="num font-serif"
+        style={{ color: "var(--color-text)", fontSize: "1.75rem", fontWeight: 500 }}
+      >
+        {value}
+      </p>
       <p className="text-xs mt-1.5" style={{ color: "var(--color-text-muted)" }}>{sub}</p>
     </div>
   );

@@ -24,20 +24,21 @@ export default function Error({
             <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" />
           </svg>
         </div>
-        <h2 className="font-serif text-lg font-semibold" style={{ color: "var(--color-text)" }}>
+        <h2 className="font-serif text-lg" style={{ color: "var(--color-text)", fontWeight: 400 }}>
           Something went wrong
         </h2>
         <p className="text-sm" style={{ color: "var(--color-text-muted)" }}>{error.message}</p>
         <button
           onClick={() => unstable_retry()}
-          className="px-4 py-2 text-xs font-semibold transition-colors duration-150"
+          className="px-4 py-2 text-xs transition-opacity duration-150"
           style={{
-            background: "var(--color-gold)",
+            background: "var(--color-accent)",
             color: "var(--color-bg)",
-            borderRadius: "3px",
+            borderRadius: "4px",
+            fontFamily: "var(--font-sans)",
           }}
-          onMouseEnter={(e) => { e.currentTarget.style.background = "var(--color-gold-bright)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = "var(--color-gold)"; }}
+          onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.8"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
         >
           Try again
         </button>

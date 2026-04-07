@@ -88,27 +88,38 @@ function EndpointCard({ endpoint }: { endpoint: EndpointConfig }) {
 
   return (
     <div
-      className="card-accent transition-colors duration-150"
-      style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", padding: "24px" }}
+      style={{
+        background: "var(--color-surface)",
+        border: "1px solid var(--color-border)",
+        borderRadius: "6px",
+        padding: "24px",
+      }}
     >
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-start justify-between mb-4">
         <div>
-          <h3 className="text-sm font-semibold" style={{ color: "var(--color-text)" }}>{endpoint.label}</h3>
+          <h3 className="font-serif text-base" style={{ color: "var(--color-text)", fontWeight: 400 }}>
+            {endpoint.label}
+          </h3>
           <p className="text-xs mt-0.5" style={{ color: "var(--color-text-muted)" }}>{endpoint.description}</p>
         </div>
         <div className="flex items-center gap-2">
-          {canPay ? (
-            <span className="text-xs px-2 py-0.5" style={{ background: "rgba(46,125,82,0.15)", color: "var(--color-success)", border: "1px solid rgba(46,125,82,0.3)" }}>
-              Paid
-            </span>
-          ) : (
-            <span className="text-xs px-2 py-0.5" style={{ background: "rgba(201,168,76,0.06)", color: "var(--color-gold-dim)", border: "1px solid rgba(201,168,76,0.1)" }}>
-              Free Demo
-            </span>
-          )}
+          <span
+            className="text-xs px-2 py-0.5"
+            style={{
+              color: "var(--color-neutral)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "3px",
+            }}
+          >
+            {canPay ? "Paid" : "Free Demo"}
+          </span>
           <span
             className="num text-xs px-2 py-1"
-            style={{ background: "rgba(201,168,76,0.12)", color: "var(--color-gold)", border: "1px solid rgba(201,168,76,0.2)" }}
+            style={{
+              color: "var(--color-text-muted)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "3px",
+            }}
           >
             {endpoint.price}
           </span>
@@ -128,9 +139,11 @@ function EndpointCard({ endpoint }: { endpoint: EndpointConfig }) {
             style={{
               background: "var(--color-bg)",
               border: "1px solid var(--color-border)",
+              borderRadius: "4px",
               color: "var(--color-text)",
+              fontFamily: "var(--font-sans)",
             }}
-            onFocus={(e) => { e.currentTarget.style.borderColor = "var(--color-gold)"; }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = "var(--color-text)"; }}
             onBlur={(e) => { e.currentTarget.style.borderColor = "var(--color-border)"; }}
           />
         </div>
@@ -138,20 +151,24 @@ function EndpointCard({ endpoint }: { endpoint: EndpointConfig }) {
         <button
           onClick={handleRun}
           disabled={loading || !input.trim()}
-          className="w-full py-2.5 text-sm font-semibold transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full py-2.5 text-sm transition-opacity duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
           style={{
-            background: "var(--color-gold)",
+            background: "var(--color-text)",
             color: "var(--color-bg)",
-            borderRadius: "3px",
+            borderRadius: "4px",
+            fontFamily: "var(--font-sans)",
           }}
-          onMouseEnter={(e) => { if (!loading) e.currentTarget.style.background = "var(--color-gold-bright)"; }}
-          onMouseLeave={(e) => { e.currentTarget.style.background = "var(--color-gold)"; }}
+          onMouseEnter={(e) => { if (!loading) e.currentTarget.style.opacity = "0.8"; }}
+          onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
         >
           {loading ? "Processing..." : "Run"}
         </button>
 
         {response && (
-          <div className="max-h-72 overflow-y-auto p-3" style={{ background: "var(--color-bg)", border: "1px solid var(--color-border)" }}>
+          <div
+            className="max-h-72 overflow-y-auto p-3"
+            style={{ background: "var(--color-bg)", border: "1px solid var(--color-border)", borderRadius: "4px" }}
+          >
             <p className="label-section mb-1.5">Response</p>
             <div className="text-sm whitespace-pre-wrap leading-relaxed" style={{ color: "var(--color-text)" }}>
               {response}
@@ -242,13 +259,13 @@ function ChatView() {
           <div className="flex flex-col items-center justify-center h-full text-center">
             <div
               className="w-12 h-12 flex items-center justify-center mb-4"
-              style={{ border: "1px solid var(--color-gold)", color: "var(--color-gold)" }}
+              style={{ border: "1px solid var(--color-border)", color: "var(--color-text-muted)" }}
             >
               <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="m6.75 7.5 3 2.25-3 2.25m4.5 0h3m-9 8.25h13.5A2.25 2.25 0 0 0 21 18V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v12a2.25 2.25 0 0 0 2.25 2.25Z" />
               </svg>
             </div>
-            <h3 className="font-serif text-lg font-semibold mb-1" style={{ color: "var(--color-text)" }}>
+            <h3 className="font-serif text-lg mb-1" style={{ color: "var(--color-text)", fontWeight: 400 }}>
               Chat with MintAI
             </h3>
             <p className="text-xs max-w-sm" style={{ color: "var(--color-text-muted)" }}>
@@ -260,7 +277,11 @@ function ChatView() {
                 <span
                   key={label}
                   className="num text-xs px-2 py-1"
-                  style={{ background: "rgba(201,168,76,0.12)", color: "var(--color-gold)", border: "1px solid rgba(201,168,76,0.2)" }}
+                  style={{
+                    color: "var(--color-text-muted)",
+                    border: "1px solid var(--color-border)",
+                    borderRadius: "3px",
+                  }}
                 >
                   {label}
                 </span>
@@ -275,15 +296,24 @@ function ChatView() {
               className="max-w-[75%] px-4 py-3 text-sm leading-relaxed"
               style={
                 msg.role === "user"
-                  ? { background: "var(--color-gold)", color: "var(--color-bg)", borderRadius: "4px 4px 0 4px" }
-                  : { background: "var(--color-surface)", border: "1px solid var(--color-border)", color: "var(--color-text)", borderRadius: "4px 4px 4px 0" }
+                  ? {
+                      background: "var(--color-text)",
+                      color: "var(--color-bg)",
+                      borderRadius: "4px 4px 0 4px",
+                    }
+                  : {
+                      background: "var(--color-surface)",
+                      border: "1px solid var(--color-border)",
+                      color: "var(--color-text)",
+                      borderRadius: "4px 4px 4px 0",
+                    }
               }
             >
               <div className="whitespace-pre-wrap">{msg.content}</div>
               {msg.role === "assistant" && isStreaming && i === messages.length - 1 && (
                 <span
                   className="inline-block w-1.5 h-4 animate-pulse ml-0.5 align-text-bottom"
-                  style={{ background: "var(--color-gold)" }}
+                  style={{ background: "var(--color-neutral)" }}
                 />
               )}
             </div>
@@ -293,7 +323,10 @@ function ChatView() {
       </div>
 
       {/* Input */}
-      <div className="px-6 py-4" style={{ borderTop: "1px solid var(--color-border)", background: "var(--color-surface)" }}>
+      <div
+        className="px-6 py-4"
+        style={{ borderTop: "1px solid var(--color-border)", background: "var(--color-surface)" }}
+      >
         <div className="flex items-end gap-3 max-w-4xl mx-auto">
           <textarea
             ref={textareaRef}
@@ -310,22 +343,24 @@ function ChatView() {
             style={{
               background: "var(--color-bg)",
               border: "1px solid var(--color-border)",
+              borderRadius: "4px",
               color: "var(--color-text)",
+              fontFamily: "var(--font-sans)",
             }}
-            onFocus={(e) => { e.currentTarget.style.borderColor = "var(--color-gold)"; }}
+            onFocus={(e) => { e.currentTarget.style.borderColor = "var(--color-text)"; }}
             onBlur={(e) => { e.currentTarget.style.borderColor = "var(--color-border)"; }}
           />
           <button
             onClick={handleSend}
             disabled={isStreaming || !input.trim()}
-            className="px-3 py-2.5 transition-colors duration-150 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="px-3 py-2.5 transition-opacity duration-150 disabled:opacity-40 disabled:cursor-not-allowed"
             style={{
-              background: "var(--color-gold)",
+              background: "var(--color-text)",
               color: "var(--color-bg)",
-              borderRadius: "3px",
+              borderRadius: "4px",
             }}
-            onMouseEnter={(e) => { if (!isStreaming) e.currentTarget.style.background = "var(--color-gold-bright)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "var(--color-gold)"; }}
+            onMouseEnter={(e) => { if (!isStreaming) e.currentTarget.style.opacity = "0.8"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5" />
@@ -349,7 +384,7 @@ export default function PlaygroundPage() {
       {/* Header */}
       <div className={`flex items-center justify-between ${advancedMode ? "" : "px-8 pt-8 pb-4"}`}>
         <div>
-          <h1 className="font-serif text-2xl font-semibold" style={{ color: "var(--color-text)" }}>
+          <h1 className="font-serif text-2xl" style={{ color: "var(--color-text)", fontWeight: 400 }}>
             Playground
           </h1>
           <p className="label-section mt-1">
@@ -360,25 +395,26 @@ export default function PlaygroundPage() {
           {!advancedMode && (
             <button
               onClick={() => setChatKey((k) => k + 1)}
-              className="text-xs transition-colors duration-150"
-              style={{ color: "var(--color-text-muted)" }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = "var(--color-text)"; }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = "var(--color-text-muted)"; }}
+              className="text-xs transition-opacity duration-150"
+              style={{ color: "var(--color-text-muted)", fontFamily: "var(--font-sans)" }}
+              onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.7"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
             >
               Clear Chat
             </button>
           )}
           <button
             onClick={() => setAdvancedMode(!advancedMode)}
-            className="text-xs font-medium px-3 py-1.5 transition-colors duration-150"
+            className="text-xs px-3 py-1.5 transition-opacity duration-150"
             style={{
-              color: "var(--color-gold)",
-              border: "1px solid var(--color-gold)",
+              color: "var(--color-text)",
+              border: "1px solid var(--color-text)",
               background: "transparent",
-              borderRadius: "3px",
+              borderRadius: "4px",
+              fontFamily: "var(--font-sans)",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.background = "rgba(201,168,76,0.08)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.background = "transparent"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.7"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
           >
             {advancedMode ? "Switch to Chat" : "Advanced Mode"}
           </button>
@@ -391,9 +427,15 @@ export default function PlaygroundPage() {
           {!canPay && (
             <div
               className="flex items-center gap-3 px-4 py-3 text-xs"
-              style={{ background: "rgba(201,168,76,0.06)", border: "1px solid rgba(201,168,76,0.15)", color: "var(--color-text-muted)" }}
+              style={{
+                background: "var(--color-surface)",
+                border: "1px solid var(--color-border)",
+                borderLeft: "3px solid var(--color-accent)",
+                color: "var(--color-text-muted)",
+                borderRadius: "4px",
+              }}
             >
-              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} style={{ color: "var(--color-gold)" }}>
+              <svg className="w-4 h-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5} style={{ color: "var(--color-accent)" }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a2.25 2.25 0 0 0-2.25-2.25H15a3 3 0 1 1-6 0H5.25A2.25 2.25 0 0 0 3 12m18 0v6a2.25 2.25 0 0 1-2.25 2.25H5.25A2.25 2.25 0 0 1 3 18v-6m18 0V9M3 12V9m18 0a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 9m18 0V6a2.25 2.25 0 0 0-2.25-2.25H5.25A2.25 2.25 0 0 0 3 6v3" />
               </svg>
               Connect your wallet to use paid endpoints — real Solana devnet USDC micropayments via x402
@@ -406,12 +448,20 @@ export default function PlaygroundPage() {
             ))}
           </div>
 
-          <div style={{ background: "var(--color-surface)", border: "1px solid var(--color-border)", padding: "20px" }}>
-            <p className="label-section mb-2">How it works</p>
+          <div
+            style={{
+              background: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "6px",
+              padding: "20px",
+            }}
+          >
+            <p className="label-section mb-3">How it works</p>
             <div className="space-y-1.5 text-xs" style={{ color: "var(--color-text-muted)" }}>
               <p>
-                In production, these endpoints are gated by <span className="num" style={{ color: "var(--color-gold)" }}>x402</span> micropayments on Solana.
-                Clients pay per request and the agent earns revenue automatically.
+                In production, these endpoints are gated by{" "}
+                <span className="num" style={{ color: "var(--color-accent)" }}>x402</span>{" "}
+                micropayments on Solana. Clients pay per request and the agent earns revenue automatically.
               </p>
               <p>
                 This playground uses free demo routes so you can test without a wallet.

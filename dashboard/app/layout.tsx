@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Cormorant_Garamond, DM_Mono, Geist } from "next/font/google";
+import { Cormorant_Garamond, DM_Mono, Inter } from "next/font/google";
 import "./globals.css";
 import Sidebar from "./components/Sidebar";
 import { ToastProvider } from "./components/Toast";
@@ -8,7 +8,7 @@ import SolanaWalletProvider from "./components/WalletProvider";
 const cormorant = Cormorant_Garamond({
   variable: "--font-cormorant",
   subsets: ["latin"],
-  weight: ["400", "500", "600", "700"],
+  weight: ["400", "500", "600"],
 });
 
 const dmMono = DM_Mono({
@@ -17,8 +17,8 @@ const dmMono = DM_Mono({
   weight: ["400", "500"],
 });
 
-const geist = Geist({
-  variable: "--font-geist-sans",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -33,7 +33,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${cormorant.variable} ${dmMono.variable} ${geist.variable} h-full antialiased dark`}>
+    <html lang="en" className={`${cormorant.variable} ${dmMono.variable} ${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-row" style={{ background: "var(--color-bg)", color: "var(--color-text)" }}>
         <SolanaWalletProvider>
           <Sidebar />
