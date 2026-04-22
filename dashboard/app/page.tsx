@@ -18,6 +18,9 @@ import { useToast } from "./components/Toast";
 import { SkeletonCard, SkeletonChart } from "./components/Skeleton";
 import { ErrorState } from "./components/ErrorState";
 import type { AgentStatus, ActivityEvent } from "../lib/types";
+import { Card, CardContent, CardHeader } from "./components/ui/card";
+import { Button } from "./components/ui/button";
+import { Badge } from "./components/ui/badge";
 
 ChartJS.register(
   CategoryScale,
@@ -35,7 +38,6 @@ export default function Overview() {
   const { data: events } = usePolling<ActivityEvent[]>(getActivity, 10000);
   const { toast } = useToast();
 
-  // Build cumulative earnings chart from real activity data
   const earningEvents = (events || []).filter((e) => e.type === "earning");
   let cumulative = 0;
   const chartPoints = earningEvents.map((e) => {
@@ -110,8 +112,8 @@ export default function Overview() {
     return (
       <div className="p-8 space-y-8">
         <div>
-          <div className="h-8 w-40 rounded animate-pulse" style={{ background: "var(--color-surface-2)" }} />
-          <div className="h-4 w-60 rounded animate-pulse mt-2" style={{ background: "var(--color-surface-2)" }} />
+          <div className="h-8 w-40 rounded animate-pulse bg-[var(--color-surface-2)]" />
+          <div className="h-4 w-60 rounded animate-pulse mt-2 bg-[var(--color-surface-2)]" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => <SkeletonCard key={i} />)}
@@ -132,11 +134,17 @@ export default function Overview() {
   return (
     <div className="p-8 space-y-6">
       {/* Header */}
-      <div>
-        <h1 className="font-serif text-2xl" style={{ color: "var(--color-text)", fontWeight: 400 }}>
-          Overview
-        </h1>
-        <p className="label-section mt-1">{agentName}</p>
+      <div className="flex items-start justify-between">
+        <div>
+          <h1 className="font-serif text-2xl font-normal text-[var(--color-text)]">
+            Overview
+          </h1>
+          <p className="label-section mt-1">{agentName}</p>
+        </div>
+        <Badge variant="success" className="mt-1 gap-1.5">
+          <span className="w-1.5 h-1.5 rounded-full bg-[var(--color-success)]" />
+          Live
+        </Badge>
       </div>
 
       {/* Stat Cards */}
@@ -148,90 +156,64 @@ export default function Overview() {
       </div>
 
       {/* Chart */}
-      <div
-        className="animate-fade-in"
-        style={{
-          background: "var(--color-surface)",
-          border: "1px solid var(--color-border)",
-          borderRadius: "6px",
-          padding: "24px",
-        }}
-      >
-        <p className="label-section mb-4">Earnings Over Time</p>
-        <div className="h-72">
-          <Line data={chartData} options={chartOptions} />
-        </div>
-      </div>
+      <Card>
+        <CardHeader className="pb-2">
+          <p className="label-section">Earnings Over Time</p>
+        </CardHeader>
+        <CardContent>
+          <div className="h-72">
+            <Line data={chartData} options={chartOptions} />
+          </div>
+        </CardContent>
+      </Card>
 
       {/* Wallet */}
-      <div
-        className="animate-fade-in"
-        style={{
-          background: "var(--color-surface)",
-          border: "1px solid var(--color-border)",
-          borderRadius: "6px",
-          padding: "24px",
-        }}
-      >
-        <p className="label-section mb-4">Wallet Information</p>
-        <div className="space-y-4">
+      <Card>
+        <CardHeader className="pb-2">
+          <p className="label-section">Wallet Information</p>
+        </CardHeader>
+        <CardContent className="space-y-4">
           <div>
-            <p className="text-xs mb-1.5" style={{ color: "var(--color-text-muted)" }}>Wallet Address (Solana)</p>
-            <div
-              className="flex items-center gap-2 px-3 py-2"
-              style={{ background: "var(--color-bg)", border: "1px solid var(--color-border)", borderRadius: "4px" }}
-            >
-              <code className="num text-sm flex-1" style={{ color: "var(--color-accent)" }}>{walletAddress}</code>
-              <button
-                className="text-xs px-2 py-1 transition-opacity duration-150"
-                style={{
-                  color: "var(--color-text-muted)",
-                  border: "1px solid var(--color-border)",
-                  borderRadius: "4px",
-                }}
+            <p className="text-xs mb-1.5 text-[var(--color-text-muted)]">Wallet Address (Solana)</p>
+            <div className="flex items-center gap-2 px-3 py-2 rounded bg-[var(--color-bg)] border border-[var(--color-border)]">
+              <code className="num text-sm flex-1 text-[var(--color-accent)]">{walletAddress}</code>
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => copyAddress(walletAddress)}
-                onMouseEnter={(e) => { e.currentTarget.style.opacity = "0.7"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.opacity = "1"; }}
               >
                 Copy
-              </button>
+              </Button>
             </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <p className="text-xs mb-1" style={{ color: "var(--color-text-muted)" }}>Network</p>
-              <p className="text-sm" style={{ color: "var(--color-text)" }}>Solana Devnet</p>
+              <p className="text-xs mb-1 text-[var(--color-text-muted)]">Network</p>
+              <p className="text-sm text-[var(--color-text)]">Solana Devnet</p>
             </div>
             <div>
-              <p className="text-xs mb-1" style={{ color: "var(--color-text-muted)" }}>Token</p>
-              <p className="text-sm" style={{ color: "var(--color-text)" }}>USDC</p>
+              <p className="text-xs mb-1 text-[var(--color-text-muted)]">Token</p>
+              <p className="text-sm text-[var(--color-text)]">USDC</p>
             </div>
           </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
 
 function StatCard({ label, value, sub }: { label: string; value: string; sub: string }) {
   return (
-    <div
-      className="animate-fade-in"
-      style={{
-        background: "var(--color-surface)",
-        border: "1px solid var(--color-border)",
-        borderRadius: "6px",
-        padding: "24px",
-      }}
-    >
-      <p className="label-section mb-3">{label}</p>
-      <p
-        className="num font-serif"
-        style={{ color: "var(--color-text)", fontSize: "1.75rem", fontWeight: 500 }}
-      >
-        {value}
-      </p>
-      <p className="text-xs mt-1.5" style={{ color: "var(--color-text-muted)" }}>{sub}</p>
-    </div>
+    <Card>
+      <CardHeader className="pb-2">
+        <p className="label-section">{label}</p>
+      </CardHeader>
+      <CardContent>
+        <p className="num font-serif text-[var(--color-text)]" style={{ fontSize: "1.75rem", fontWeight: 500 }}>
+          {value}
+        </p>
+        <p className="text-xs mt-1.5 text-[var(--color-text-muted)]">{sub}</p>
+      </CardContent>
+    </Card>
   );
 }
